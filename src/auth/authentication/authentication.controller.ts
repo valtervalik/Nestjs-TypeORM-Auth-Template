@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   HttpStatus,
   Post,
@@ -63,5 +64,11 @@ export class AuthenticationController {
     await this.otpAuthService.enableTFAForUser(activeUser.email, secret);
     response.type('png');
     return toFileStream(response, uri);
+  }
+
+  @Get('logout')
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie('refresh_token', { path: '/auth/refresh-token' });
+    return { message: 'Logout successful' };
   }
 }
