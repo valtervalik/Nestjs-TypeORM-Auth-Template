@@ -17,10 +17,44 @@ In addition to these features, this template provides Two Factor Authentication 
 
 1. **Clone the repository**: Use git clone command to clone the repository to your local machine.
 
-2. **Install dependencies**: Run `npm install` or `yarn install` to install all the necessary dependencies.
+```bash
+git clone https://github.com/valtervalik/Nestjs-auth-template.git
+```
 
-3. **Run docker-compose**: Use the command `docker-compose up` to start the Docker containers.
+2. **Enter the project folder**:
 
-4. **Set your environment variables**: Set up your environment variables based on the `.env.example` file in the repository.
+```bash
+cd Nestjs-auth-template
+```
 
-5. **Run the application in development mode**: Use the command `npm run start:dev` or `yarn start:dev` to start the application in development mode.
+3. **Install dependencies**: Run any of the following commands to install all the necessary dependencies.
+
+```bash
+npm install
+```
+```bash
+yarn install
+```
+```bash
+pnpm install
+```
+
+4. **Run docker-compose**: Use the following command to start the Docker containers.
+
+```bash
+docker-compose up -d
+```
+
+5. **Set your environment variables**: Set up your environment variables based on the `.env.example` file in the repository.
+
+6. **Run the application in development mode**: Use any of the following commands to start the application in development mode.
+
+```bash
+npm run start:dev
+```
+```bash
+yarn start:dev
+```
+```bash
+pnpm start:dev
+```
