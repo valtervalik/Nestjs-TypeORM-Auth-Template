@@ -39,3 +39,4 @@ lerna-debug.log*
 
 #misc
 repl.ts
+pnpm-lock.yaml
