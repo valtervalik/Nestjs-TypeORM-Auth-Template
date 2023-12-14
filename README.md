@@ -9,7 +9,7 @@
 
 ## Description
 
-This is an authentication and authorization template using Nestjs. It implements JWT access and refresh tokens in the safest way using HTTPOnly cookies and Redis for token invalidation. It also implements user roles and permissions for authorization using Nestjs guards. The database used for storing user, role, and permission entities is PostgreSQL.
+This is an authentication and authorization Nestjs module. It implements JWT access and refresh tokens in the safest way using HTTPOnly cookies and Redis for token invalidation. It also implements user roles and permissions for authorization using Nestjs guards. The database used for storing user, role, and permission entities is PostgreSQL.
 
 In addition to these features, this template provides Two Factor Authentication and Google OAuth2 authentication functionalities.
 
