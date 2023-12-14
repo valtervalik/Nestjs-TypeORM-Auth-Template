@@ -39,7 +39,9 @@ export class User {
   @OneToMany((type) => ApiKey, (apiKey) => apiKey.user)
   apiKeys: ApiKey[];
 
-  @OneToOne(() => Permission, (permission) => permission.user)
+  @OneToOne(() => Permission, (permission) => permission.user, {
+    cascade: true,
+  })
   @JoinColumn()
   permission: Permission;
 }
