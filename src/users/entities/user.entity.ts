@@ -26,6 +26,12 @@ export class User {
   @ManyToOne((type) => Role, (role) => role.user)
   role: Role;
 
+  @OneToOne(() => Permission, (permission) => permission.user, {
+    cascade: true,
+  })
+  @JoinColumn()
+  permission: Permission;
+
   @Column({ default: false })
   isTFAEnabled: boolean;
 
@@ -38,10 +44,4 @@ export class User {
   @JoinTable()
   @OneToMany((type) => ApiKey, (apiKey) => apiKey.user)
   apiKeys: ApiKey[];
-
-  @OneToOne(() => Permission, (permission) => permission.user, {
-    cascade: true,
-  })
-  @JoinColumn()
-  permission: Permission;
 }
