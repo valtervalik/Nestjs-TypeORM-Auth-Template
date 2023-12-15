@@ -79,9 +79,7 @@ export class AuthenticationService {
       }
     }
 
-    const { password, ...userData } = user;
-
-    return await this.generateTokens(userData, response);
+    return await this.generateTokens(user, response);
   }
 
   async refreshToken(refreshToken: string, response: Response) {
