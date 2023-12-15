@@ -21,10 +21,7 @@ export class PermissionsService {
   }
 
   findOne(id: number) {
-    return this.permissionRepository.findOne({
-      where: { user: { id: id } },
-      relations: { user: true },
-    });
+    return `This action returns a #${id} permission`;
   }
 
   update(id: number, updatePermissionDto: UpdatePermissionDto) {
