@@ -20,8 +20,8 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ nullable: true })
-  password: string;
+  @Column({ nullable: true, select: false })
+  password?: string;
 
   @ManyToOne((type) => Role, (role) => role.user)
   role: Role;
@@ -36,10 +36,10 @@ export class User {
   isTFAEnabled: boolean;
 
   @Column({ nullable: true })
-  tfaSecret: string;
+  tfaSecret?: string;
 
   @Column({ nullable: true })
-  googleId: string;
+  googleId?: string;
 
   @JoinTable()
   @OneToMany((type) => ApiKey, (apiKey) => apiKey.user)

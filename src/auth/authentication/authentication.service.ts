@@ -54,6 +54,7 @@ export class AuthenticationService {
     const user = await this.userRepository.findOne({
       where: { email: signInDto.email },
       relations: { role: true, permission: true },
+      select: ['id', 'email', 'password', 'isTFAEnabled', 'tfaSecret'],
     });
 
     if (!user) {
@@ -77,7 +78,10 @@ export class AuthenticationService {
         throw new UnauthorizedException('Invalid 2FA code');
       }
     }
-    return await this.generateTokens(user, response);
+
+    const { password, ...userData } = user;
+
+    return await this.generateTokens(userData, response);
   }
 
   async refreshToken(refreshToken: string, response: Response) {
