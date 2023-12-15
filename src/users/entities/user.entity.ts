@@ -8,7 +8,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ApiKey } from '../api-keys/entities/api-key.entity/api-key.entity';
+import { ApiKey } from '../api-keys/entities/api-key.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { Permission } from 'src/permissions/entities/permission.entity';
 

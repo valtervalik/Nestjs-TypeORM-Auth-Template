@@ -10,7 +10,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { Role } from 'src/roles/entities/role.entity';
 import { Permission } from 'src/permissions/entities/permission.entity';
 import { PermissionsService } from 'src/permissions/permissions.service';
-import { ApiKey } from 'src/users/api-keys/entities/api-key.entity/api-key.entity';
+import { ApiKey } from 'src/users/api-keys/entities//api-key.entity';
 import { AuthGuard } from './authentication/guards/auth.guard';
 import { RolesGuard } from './authorization/guards/roles.guard';
 import { PermissionsGuard } from './authorization/guards/permissions.guard';

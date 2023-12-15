@@ -7,7 +7,7 @@ import {
 import { Request } from 'express';
 import { ApiKeysService } from '../api-keys.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ApiKey } from 'src/users/api-keys/entities/api-key.entity/api-key.entity';
+import { ApiKey } from 'src/users/api-keys/entities//api-key.entity';
 import { Repository } from 'typeorm';
 import { REQUEST_USER_KEY } from 'src/auth/auth.constants';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
@@ -40,6 +40,7 @@ export class ApiKeyGuard implements CanActivate {
         sub: apiKeyEntity.user.id,
         email: apiKeyEntity.user.email,
         role: apiKeyEntity.user.role,
+        permission: apiKeyEntity.user.permission,
       } as ActiveUserData;
     } catch {
       throw new UnauthorizedException();
