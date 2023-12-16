@@ -19,7 +19,6 @@ import { DatabaseModule } from './database/database.module';
     RolesModule,
     PermissionsModule,
     RedisModule,
-    DatabaseModule,
   ],
   controllers: [],
   providers: [],
