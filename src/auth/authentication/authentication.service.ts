@@ -58,25 +58,30 @@ export class AuthenticationService {
     });
 
     if (!user) {
-      throw new UnauthorizedException('User does not exists');
+      throw new UnauthorizedException('User does not exist');
     }
 
-    const isEqual = await this.hashingService.compare(
+    if (!user.password) {
+      if (user.googleId) {
+        throw new UnauthorizedException('Login with your Google account');
+      }
+      throw new UnauthorizedException();
+    }
+
+    const isValidPassword = await this.hashingService.compare(
       signInDto.password,
       user.password,
     );
-    if (!isEqual) {
+
+    if (!isValidPassword) {
       throw new UnauthorizedException('Password does not match');
     }
-    if (user.isTFAEnabled) {
-      const isValid = this.otpAuthService.verifyCode(
-        signInDto.tfaCode,
-        user.tfaSecret,
-      );
 
-      if (!isValid) {
-        throw new UnauthorizedException('Invalid 2FA code');
-      }
+    if (
+      user.isTFAEnabled &&
+      !this.otpAuthService.verifyCode(signInDto.tfaCode, user.tfaSecret)
+    ) {
+      throw new UnauthorizedException('Invalid 2FA code');
     }
 
     return await this.generateTokens(user, response);
