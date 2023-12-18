@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { authenticator } from 'otplib';
@@ -29,6 +29,11 @@ export class OtpAuthService {
       where: { email },
       select: { id: true },
     });
+
+    if (!id) {
+      throw new BadRequestException('User not found');
+    }
+
     await this.userRepository.update(
       { id },
       //In the real world the secret would be encrypted
