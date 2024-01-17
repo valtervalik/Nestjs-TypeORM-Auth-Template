@@ -18,7 +18,6 @@ import {
 @Injectable()
 export class AuthenticationService extends BaseService<User>(User) {
   constructor(
-    private readonly userRepository,
     private readonly hashingService: HashingService,
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
@@ -26,11 +25,11 @@ export class AuthenticationService extends BaseService<User>(User) {
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
     private readonly otpAuthService: OtpAuthService,
   ) {
-    super(userRepository);
+    super();
   }
 
   async signIn(signInDto: SignInDto, response: Response) {
-    const user = await this.userRepository.findOne({
+    const user = await this.genericRepository.findOne({
       where: { email: signInDto.email },
       relations: { role: true, permission: true },
       select: ['id', 'email', 'password', 'isTFAEnabled', 'tfaSecret'],
@@ -76,7 +75,7 @@ export class AuthenticationService extends BaseService<User>(User) {
         issuer: this.jwtConfiguration.issuer,
       });
 
-      const user = await this.userRepository.findOne({
+      const user = await this.genericRepository.findOne({
         where: { id: sub },
         relations: { role: true, permission: true },
       });
