@@ -5,7 +5,6 @@ import { randomUUID } from 'crypto';
 import { Response } from 'express';
 import { BaseService } from 'src/base/base.service';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
 import jwtConfig from '../config/jwt.config';
 import { HashingService } from '../hashing/hashing.service';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
@@ -19,7 +18,7 @@ import {
 @Injectable()
 export class AuthenticationService extends BaseService<User>(User) {
   constructor(
-    private readonly userRepository: Repository<User>,
+    private readonly userRepository,
     private readonly hashingService: HashingService,
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
