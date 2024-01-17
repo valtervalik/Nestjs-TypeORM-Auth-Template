@@ -1,6 +1,9 @@
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { Repository } from 'typeorm';
 
 export interface IBaseService<M> {
+  genericRepository: Repository<M>;
+
   create(createDto: Params, activeUser?: ActiveUserData): Promise<M>;
 
   createIfUnique(

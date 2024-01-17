@@ -5,7 +5,6 @@ import { randomUUID } from 'crypto';
 import { Response } from 'express';
 import { BaseService } from 'src/base/base.service';
 import { User } from 'src/users/entities/user.entity';
-import { Repository } from 'typeorm';
 import jwtConfig from '../config/jwt.config';
 import { HashingService } from '../hashing/hashing.service';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
@@ -19,7 +18,6 @@ import {
 @Injectable()
 export class AuthenticationService extends BaseService<User>(User) {
   constructor(
-    private readonly userRepository: Repository<User>,
     private readonly hashingService: HashingService,
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
@@ -27,11 +25,11 @@ export class AuthenticationService extends BaseService<User>(User) {
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
     private readonly otpAuthService: OtpAuthService,
   ) {
-    super(userRepository);
+    super();
   }
 
   async signIn(signInDto: SignInDto, response: Response) {
-    const user = await this.userRepository.findOne({
+    const user = await this.genericRepository.findOne({
       where: { email: signInDto.email },
       relations: { role: true, permission: true },
       select: ['id', 'email', 'password', 'isTFAEnabled', 'tfaSecret'],
@@ -77,7 +75,7 @@ export class AuthenticationService extends BaseService<User>(User) {
         issuer: this.jwtConfiguration.issuer,
       });
 
-      const user = await this.userRepository.findOne({
+      const user = await this.genericRepository.findOne({
         where: { id: sub },
         relations: { role: true, permission: true },
       });

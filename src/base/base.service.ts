@@ -29,10 +29,8 @@ export function BaseService<T>(
 
   @Injectable()
   class BaseServiceClass<T> implements IBaseService<T> {
-    constructor(
-      @InjectRepository(entityClass)
-      private readonly genericRepository: Repository<T>,
-    ) {}
+    @InjectRepository(entityClass)
+    public readonly genericRepository: Repository<T>;
 
     public async create(
       createDto: Params,
@@ -98,7 +96,7 @@ export function BaseService<T>(
     ): Promise<{ elements: T[]; pagination: PaginationResult }> {
       const { page = 1, limit = 10 } = pagination;
       const skipCount = (page - 1) * limit;
-      const order = conditions['order'] || 'createdAt';
+      const order = conditions['order'] || 'created_at';
       const select = conditions['select'] || [];
       const relations = conditions['relations'] || [];
 
@@ -143,7 +141,7 @@ export function BaseService<T>(
     public async findAllWithoutPagination(
       conditions: Params = {},
     ): Promise<{ elements: T[]; total: number }> {
-      const order = conditions['order'] || 'createdAt';
+      const order = conditions['order'] || 'created_at';
       const select = conditions['select'] || [];
       const relations = conditions['relations'] || [];
 
@@ -191,14 +189,14 @@ export function BaseService<T>(
       delete where.relations;
       delete where.select;
 
-      const queryBuilder = this.genericRepository.createQueryBuilder();
+      const queryBuilder = this.genericRepository.createQueryBuilder('entity');
 
       queryBuilder
-        .select(select.length > 0 ? select.split(',') : null)
-        .where(where);
+        .select(select.length > 0 ? select.map((s) => `entity.${s}`) : null)
+        .where(where.where);
 
-      if (relations.length > 0) {
-        relations.split(',').forEach((relation) => {
+      if (Object.keys(relations).length > 0) {
+        Object.keys(relations).forEach((relation) => {
           queryBuilder.leftJoinAndSelect(`entity.${relation}`, relation);
         });
       }
@@ -365,5 +363,6 @@ export function BaseService<T>(
       return count;
     }
   }
+
   return BaseServiceClass;
 }
