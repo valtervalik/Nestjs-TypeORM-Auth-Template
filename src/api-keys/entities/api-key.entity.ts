@@ -1,11 +1,9 @@
+import { Base } from 'src/base/base.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne } from 'typeorm';
 
 @Entity()
-export class ApiKey {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class ApiKey extends Base {
   @Column()
   key: string;
 

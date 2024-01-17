@@ -4,13 +4,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { Request } from 'express';
-import { ApiKeysService } from '../api-keys.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { ApiKey } from 'src/users/api-keys/entities//api-key.entity';
-import { Repository } from 'typeorm';
+import { Request } from 'express';
+import { ApiKey } from 'src/api-keys/entities/api-key.entity';
 import { REQUEST_USER_KEY } from 'src/auth/auth.constants';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { Repository } from 'typeorm';
+import { ApiKeysService } from '../api-keys.service';
 
 @Injectable()
 export class ApiKeyGuard implements CanActivate {
