@@ -1,53 +1,33 @@
-import {
-  ConflictException,
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { randomUUID } from 'crypto';
+import { Response } from 'express';
+import { BaseService } from 'src/base/base.service';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { HashingService } from '../hashing/hashing.service';
-import { SignUpDto } from './dto/sign-up.dto';
-import { SignInDto } from './dto/sign-in.dto';
-import { JwtService } from '@nestjs/jwt';
 import jwtConfig from '../config/jwt.config';
-import { ConfigType } from '@nestjs/config';
+import { HashingService } from '../hashing/hashing.service';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
+import { SignInDto } from './dto/sign-in.dto';
+import { OtpAuthService } from './otp-auth.service';
 import {
   InvalidateRefreshTokenError,
   RefreshTokenIdsStorage,
 } from './refresh-token-ids.storage/refresh-token-ids.storage';
-import { randomUUID } from 'crypto';
-import { OtpAuthService } from './otp-auth.service';
-import { Response } from 'express';
 
 @Injectable()
-export class AuthenticationService {
+export class AuthenticationService extends BaseService<User>(User) {
   constructor(
-    @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly userRepository: Repository<User>,
     private readonly hashingService: HashingService,
     private readonly jwtService: JwtService,
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
     private readonly otpAuthService: OtpAuthService,
-  ) {}
-
-  async signUp(signUpDto: SignUpDto) {
-    try {
-      const user = this.userRepository.create({
-        email: signUpDto.email,
-        password: await this.hashingService.hash(signUpDto.password),
-      });
-      await this.userRepository.save(user);
-    } catch (e) {
-      const pgUniqueViolationCode = '23505';
-      if (e.code === pgUniqueViolationCode) {
-        throw new ConflictException();
-      }
-      throw e;
-    }
+  ) {
+    super(userRepository);
   }
 
   async signIn(signInDto: SignInDto, response: Response) {
