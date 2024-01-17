@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
+  Controller,
   Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { Permissions } from 'src/auth/authorization/decorators/permissions.decorator';
+import { Roles } from 'src/auth/authorization/decorators/roles.decorator';
+import { Permission } from 'src/auth/authorization/permission.type';
+import { UserRoles } from 'src/roles/enums/user-roles.enum';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Roles } from 'src/auth/authorization/decorators/roles.decorator';
-import { UserRoles } from 'src/roles/enums/user-roles.enum';
-import { Permissions } from 'src/auth/authorization/decorators/permissions.decorator';
-import { Permission } from 'src/auth/authorization/permission.type';
+import { UsersService } from './users.service';
 
 @Controller('users')
 export class UsersController {
@@ -28,12 +28,12 @@ export class UsersController {
 
   @Get()
   findAll() {
-    return this.usersService.findAll();
+    return this.usersService.findAllWithoutPagination({});
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOne({ id: +id });
   }
 
   @Patch(':id')

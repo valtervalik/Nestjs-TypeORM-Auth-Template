@@ -1,3 +1,6 @@
+import { ApiKey } from 'src/api-keys/entities/api-key.entity';
+import { Base } from 'src/base/base.entity';
+import { Permission } from 'src/permissions/entities/permission.entity';
 import {
   Column,
   Entity,
@@ -6,17 +9,11 @@ import {
   ManyToOne,
   OneToMany,
   OneToOne,
-  PrimaryGeneratedColumn,
 } from 'typeorm';
-import { ApiKey } from '../api-keys/entities/api-key.entity';
 import { Role } from '../../roles/entities/role.entity';
-import { Permission } from 'src/permissions/entities/permission.entity';
 
 @Entity()
-export class User {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class User extends Base {
   @Column({ unique: true })
   email: string;
 
