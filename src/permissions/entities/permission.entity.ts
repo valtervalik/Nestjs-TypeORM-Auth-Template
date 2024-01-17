@@ -1,11 +1,9 @@
+import { Base } from 'src/base/base.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToOne } from 'typeorm';
 
 @Entity()
-export class Permission {
-  @PrimaryGeneratedColumn()
-  id: number;
-
+export class Permission extends Base {
   @Column({ default: false })
   create_user: boolean;
 
