@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
+import { EncryptingModule } from 'src/encrypting/encrypting.module';
 import { HashingModule } from 'src/hashing/hashing.module';
 import { PermissionsModule } from 'src/permissions/permissions.module';
 import { RolesModule } from 'src/roles/roles.module';
@@ -27,6 +28,7 @@ import jwtConfig from './config/jwt.config';
     JwtModule.registerAsync(jwtConfig.asProvider()),
     ConfigModule.forFeature(jwtConfig),
     HashingModule,
+    EncryptingModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: AuthGuard },

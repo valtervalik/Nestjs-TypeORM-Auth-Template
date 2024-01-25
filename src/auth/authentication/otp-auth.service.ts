@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { authenticator } from 'otplib';
+import { EncryptingService } from 'src/encrypting/encrypting.service';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
@@ -10,6 +11,7 @@ export class OtpAuthService {
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly encryptingService: EncryptingService,
   ) {}
 
   async generateSecret(email: string) {
@@ -20,11 +22,15 @@ export class OtpAuthService {
     return { secret, uri };
   }
 
-  verifyCode(code: string, secret: string) {
-    return authenticator.verify({ token: code, secret });
+  async verifyCode(code: string, encryptedSecret: string) {
+    const decrypted = await this.encryptingService.decrypt(encryptedSecret);
+
+    return authenticator.verify({ token: code, secret: decrypted });
   }
 
   async enableTFAForUser(email: string, secret: string) {
+    const encrypted = await this.encryptingService.encrypt(secret);
+
     const { id } = await this.userRepository.findOneOrFail({
       where: { email },
       select: { id: true },
@@ -36,8 +42,7 @@ export class OtpAuthService {
 
     await this.userRepository.update(
       { id },
-      //In the real world the secret would be encrypted
-      { tfaSecret: secret, isTFAEnabled: true },
+      { tfaSecret: encrypted, isTFAEnabled: true },
     );
   }
 }
