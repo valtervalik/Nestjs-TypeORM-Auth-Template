@@ -1,15 +1,6 @@
-import { ApiKey } from 'src/api-keys/entities/api-key.entity';
 import { Base } from 'src/base/base.entity';
 import { Permission } from 'src/permissions/entities/permission.entity';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  JoinTable,
-  ManyToOne,
-  OneToMany,
-  OneToOne,
-} from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
 
 @Entity()
@@ -37,8 +28,4 @@ export class User extends Base {
 
   @Column({ nullable: true })
   googleId?: string;
-
-  @JoinTable()
-  @OneToMany((type) => ApiKey, (apiKey) => apiKey.user)
-  apiKeys: ApiKey[];
 }
