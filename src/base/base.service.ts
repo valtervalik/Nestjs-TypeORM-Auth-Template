@@ -41,7 +41,7 @@ export function BaseService<T>(
         const entity = activeUser
           ? {
               ...createDto,
-              createdBy: activeUser.sub,
+              created_by: activeUser.sub,
             }
           : createDto;
 
@@ -76,7 +76,7 @@ export function BaseService<T>(
       const entity = activeUser
         ? {
             ...createDto,
-            createdBy: activeUser.sub,
+            created_by: activeUser.sub,
           }
         : createDto;
 
@@ -230,7 +230,7 @@ export function BaseService<T>(
       activeUser?: ActiveUserData,
     ): Promise<T> {
       const updateData = activeUser
-        ? { ...updateDto, updatedBy: activeUser.sub }
+        ? { ...updateDto, updated_by: activeUser.sub }
         : updateDto;
 
       const queryBuilder = this.genericRepository.createQueryBuilder();
@@ -260,7 +260,7 @@ export function BaseService<T>(
       activeUser?: ActiveUserData,
     ): Promise<any> {
       const updateData = activeUser
-        ? { ...conditions, updatedBy: activeUser.sub }
+        ? { ...conditions, updated_by: activeUser.sub }
         : conditions;
 
       const queryBuilder = this.genericRepository.createQueryBuilder();
@@ -281,7 +281,7 @@ export function BaseService<T>(
         if (activeUser) {
           await queryBuilder
             .update()
-            .set({ deletedBy: activeUser.sub } as any)
+            .set({ deleted_by: activeUser.sub } as any)
             .where('id = :id', { id })
             .execute();
         }
@@ -306,7 +306,7 @@ export function BaseService<T>(
         if (activeUser) {
           await queryBuilder
             .update()
-            .set({ deletedBy: activeUser.sub } as any)
+            .set({ deleted_by: activeUser.sub } as any)
             .whereInIds(ids)
             .execute();
         }
@@ -324,8 +324,12 @@ export function BaseService<T>(
       activeUser?: ActiveUserData,
     ): Promise<any> {
       const updateData = activeUser
-        ? { deleted: false, restoredAt: new Date(), restoredBy: activeUser.sub }
-        : { deleted: false, restoredAt: new Date() };
+        ? {
+            deleted: false,
+            restored_at: new Date(),
+            restored_by: activeUser.sub,
+          }
+        : { deleted: false, restored_at: new Date() };
 
       const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -341,8 +345,12 @@ export function BaseService<T>(
       activeUser?: ActiveUserData,
     ): Promise<any> {
       const updateData = activeUser
-        ? { deleted: false, restoredAt: new Date(), restoredBy: activeUser.sub }
-        : { deleted: false, restoredAt: new Date() };
+        ? {
+            deleted: false,
+            restored_at: new Date(),
+            restored_by: activeUser.sub,
+          }
+        : { deleted: false, restored_at: new Date() };
 
       const queryBuilder = this.genericRepository.createQueryBuilder();
 
