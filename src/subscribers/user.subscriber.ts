@@ -1,4 +1,4 @@
-import { HashingService } from 'src/auth/hashing/hashing.service';
+import { HashingService } from 'src/hashing/hashing.service';
 import { User } from 'src/users/entities/user.entity';
 import {
   DataSource,
