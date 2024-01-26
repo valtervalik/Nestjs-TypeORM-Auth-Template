@@ -1,6 +1,6 @@
 import { Base } from 'src/base/base.entity';
 import { User } from 'src/users/entities/user.entity';
-import { Column, Entity, OneToOne } from 'typeorm';
+import { Column, Entity, JoinColumn, OneToOne } from 'typeorm';
 
 @Entity()
 export class Permission extends Base {
@@ -14,5 +14,6 @@ export class Permission extends Base {
   delete_user: boolean;
 
   @OneToOne(() => User, (user) => user.permission)
+  @JoinColumn()
   user: User;
 }
