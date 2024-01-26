@@ -105,14 +105,14 @@ export function BaseService<T>(
       delete where.relations;
       delete where.select;
 
-      const queryBuilder = this.genericRepository.createQueryBuilder();
+      const queryBuilder = this.genericRepository.createQueryBuilder('entity');
 
       queryBuilder
         .select(select.length > 0 ? select : null)
         .where(where)
         .skip(skipCount)
         .take(limit)
-        .orderBy(order);
+        .orderBy(`entity.${order}`);
 
       if (relations.length > 0) {
         relations.forEach((relation) => {
@@ -150,12 +150,12 @@ export function BaseService<T>(
       delete where.relations;
       delete where.select;
 
-      const queryBuilder = this.genericRepository.createQueryBuilder();
+      const queryBuilder = this.genericRepository.createQueryBuilder('entity');
 
       queryBuilder
         .select(select.length > 0 ? select : null)
         .where(where)
-        .orderBy(order);
+        .orderBy(`entity.${order}`);
 
       if (relations.length > 0) {
         relations.forEach((relation) => {
