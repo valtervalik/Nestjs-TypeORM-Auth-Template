@@ -1,10 +1,21 @@
 import { Base } from 'src/base/base.entity';
 import { Permission } from 'src/permissions/entities/permission.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToOne } from 'typeorm';
+import {
+  Column,
+  Entity,
+  Generated,
+  JoinColumn,
+  ManyToOne,
+  OneToOne,
+} from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
 
 @Entity()
 export class User extends Base {
+  @Generated('uuid')
+  @Column()
+  uuid: string;
+
   @Column({ unique: true })
   email: string;
 
