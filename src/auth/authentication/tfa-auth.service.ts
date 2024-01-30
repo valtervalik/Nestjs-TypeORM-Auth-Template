@@ -2,12 +2,12 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { authenticator } from 'otplib';
-import { EncryptingService } from 'src/encrypting/encrypting.service';
+import { EncryptingService } from 'src/common/encrypting/encrypting.service';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class OtpAuthService {
+export class TFAAuthService {
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
