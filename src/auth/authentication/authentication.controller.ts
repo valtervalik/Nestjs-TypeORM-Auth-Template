@@ -17,14 +17,14 @@ import { Auth } from './decorators/auth.decorator';
 import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { AuthType } from './enums/auth-type.enum';
-import { OtpAuthService } from './otp-auth.service';
+import { TFAAuthService } from './tfa-auth.service';
 
 @Auth(AuthType.None)
 @Controller('auth')
 export class AuthenticationController {
   constructor(
     private readonly authenticationService: AuthenticationService,
-    private readonly otpAuthService: OtpAuthService,
+    private readonly tfaAuthService: TFAAuthService,
   ) {}
 
   @Post('sign-up')
@@ -58,10 +58,10 @@ export class AuthenticationController {
     @ActiveUser() activeUser: ActiveUserData,
     @Res() response: Response,
   ) {
-    const { secret, uri } = await this.otpAuthService.generateSecret(
+    const { secret, uri } = await this.tfaAuthService.generateSecret(
       activeUser.email,
     );
-    await this.otpAuthService.enableTFAForUser(activeUser.email, secret);
+    await this.tfaAuthService.enableTFAForUser(activeUser.email, secret);
     response.type('png');
     return toFileStream(response, uri);
   }

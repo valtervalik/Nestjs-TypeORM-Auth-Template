@@ -4,16 +4,16 @@ import { JwtService } from '@nestjs/jwt';
 import { randomUUID } from 'crypto';
 import { Response } from 'express';
 import { BaseService } from 'src/base/base.service';
+import { HashingService } from 'src/common/hashing/hashing.service';
 import { User } from 'src/users/entities/user.entity';
-import { HashingService } from '../../hashing/hashing.service';
 import jwtConfig from '../config/jwt.config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { SignInDto } from './dto/sign-in.dto';
-import { OtpAuthService } from './otp-auth.service';
 import {
   InvalidateRefreshTokenError,
   RefreshTokenIdsStorage,
 } from './refresh-token-ids.storage/refresh-token-ids.storage';
+import { TFAAuthService } from './tfa-auth.service';
 
 @Injectable()
 export class AuthenticationService extends BaseService<User>(User) {
@@ -23,7 +23,7 @@ export class AuthenticationService extends BaseService<User>(User) {
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
-    private readonly otpAuthService: OtpAuthService,
+    private readonly tfaAuthService: TFAAuthService,
   ) {
     super();
   }
@@ -57,7 +57,7 @@ export class AuthenticationService extends BaseService<User>(User) {
 
     if (
       user.isTFAEnabled &&
-      !this.otpAuthService.verifyCode(signInDto.tfaCode, user.tfaSecret)
+      !this.tfaAuthService.verifyCode(signInDto.tfaCode, user.tfaSecret)
     ) {
       throw new UnauthorizedException('Invalid 2FA code');
     }
