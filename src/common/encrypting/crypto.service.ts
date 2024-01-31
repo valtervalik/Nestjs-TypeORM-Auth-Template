@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { EncryptingService } from './encrypting.service';
 import { ConfigService } from '@nestjs/config';
-import { createCipheriv, createDecipheriv, randomInt } from 'crypto';
+import { createCipheriv, createDecipheriv } from 'crypto';
+import { EncryptingService } from './encrypting.service';
 
 @Injectable()
 export class CryptoService implements EncryptingService {
@@ -29,21 +29,5 @@ export class CryptoService implements EncryptingService {
     let decrypted = decipher.update(encryptedStr, 'hex', 'utf8');
     decrypted += decipher.final('utf8');
     return decrypted;
-  }
-
-  async generatePassword(length: number): Promise<string> {
-    const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-    const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-    const numbers = '0123456789';
-    const symbols = '!@#$%^&*()_+-=[]{}|;:,.<>?';
-
-    const all = uppercase + lowercase + numbers + symbols;
-
-    let password = '';
-    for (let i = 0; i < length; i++) {
-      password += all[randomInt(all.length)];
-    }
-
-    return password;
   }
 }
