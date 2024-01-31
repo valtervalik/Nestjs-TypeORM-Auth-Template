@@ -193,7 +193,7 @@ export function BaseService<T>(
 
       queryBuilder
         .select(select.length > 0 ? select.map((s) => `entity.${s}`) : null)
-        .where(where.where);
+        .where(where);
 
       if (Object.keys(relations).length > 0) {
         Object.keys(relations).forEach((relation) => {
