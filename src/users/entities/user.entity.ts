@@ -39,4 +39,20 @@ export class User extends Base {
 
   @Column({ nullable: true })
   googleId?: string;
+
+  @OneToOne(() => User, (user) => user.created_by)
+  @JoinColumn()
+  created_by: User;
+
+  @OneToOne(() => User, (user) => user.deleted_by)
+  @JoinColumn()
+  deleted_by: User;
+
+  @OneToOne(() => User, (user) => user.updated_by)
+  @JoinColumn()
+  updated_by: User;
+
+  @OneToOne(() => User, (user) => user.restored_by)
+  @JoinColumn()
+  restored_by: User;
 }
