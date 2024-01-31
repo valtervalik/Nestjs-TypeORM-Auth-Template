@@ -1,8 +1,9 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { PermissionType } from '../permission.type';
 import { PERMISSIONS_KEY, REQUEST_USER_KEY } from 'src/auth/auth.constants';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
+import { UserRoles } from 'src/roles/enums/user-roles.enum';
+import { PermissionType } from '../permission.type';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -18,6 +19,8 @@ export class PermissionsGuard implements CanActivate {
     const user: ActiveUserData = context.switchToHttp().getRequest()[
       REQUEST_USER_KEY
     ];
+
+    if (user.role.name === UserRoles.Super) return true;
 
     return contextPermissions.every(
       (permission) => user.permission && user.permission[permission],
