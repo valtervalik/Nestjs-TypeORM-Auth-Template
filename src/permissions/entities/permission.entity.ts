@@ -8,6 +8,9 @@ export class Permission extends Base {
   create_user: boolean;
 
   @Column({ default: false })
+  read_user: boolean;
+
+  @Column({ default: false })
   update_user: boolean;
 
   @Column({ default: false })
@@ -15,5 +18,17 @@ export class Permission extends Base {
 
   @OneToOne(() => User, (user) => user.permission)
   @JoinColumn()
-  user: User;
+  created_by: User;
+
+  @OneToOne(() => User, (user) => user.permission)
+  @JoinColumn()
+  deleted_by: User;
+
+  @OneToOne(() => User, (user) => user.permission)
+  @JoinColumn()
+  updated_by: User;
+
+  @OneToOne(() => User, (user) => user.permission)
+  @JoinColumn()
+  restored_by: User;
 }

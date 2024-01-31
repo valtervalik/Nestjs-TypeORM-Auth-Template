@@ -25,7 +25,16 @@ export class User extends Base {
   @ManyToOne((type) => Role, (role) => role.user)
   role: Role;
 
-  @OneToOne(() => Permission, (permission) => permission.user, {
+  @OneToOne(() => Permission, (permission) => permission.created_by, {
+    cascade: true,
+  })
+  @OneToOne(() => Permission, (permission) => permission.deleted_by, {
+    cascade: true,
+  })
+  @OneToOne(() => Permission, (permission) => permission.updated_by, {
+    cascade: true,
+  })
+  @OneToOne(() => Permission, (permission) => permission.restored_by, {
     cascade: true,
   })
   @JoinColumn()
