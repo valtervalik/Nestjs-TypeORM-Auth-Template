@@ -32,7 +32,7 @@ export class UsersController {
   }
 
   @Get()
-  findAll(@Query() { page, limit }) {
+  findAll(@Query() { page = '1', limit = '10' }) {
     return this.usersService.findAll(
       {},
       { page: parseInt(page), limit: parseInt(limit) },
