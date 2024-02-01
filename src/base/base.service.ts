@@ -106,6 +106,10 @@ export function BaseService<T>(
       delete where.select;
 
       const queryBuilder = this.genericRepository.createQueryBuilder('entity');
+      if (where.deleted) {
+        queryBuilder.withDeleted();
+        delete where.deleted;
+      }
 
       queryBuilder
         .select(select.length > 0 ? select : null)
@@ -151,6 +155,10 @@ export function BaseService<T>(
       delete where.select;
 
       const queryBuilder = this.genericRepository.createQueryBuilder('entity');
+      if (where.deleted) {
+        queryBuilder.withDeleted();
+        delete where.deleted;
+      }
 
       queryBuilder
         .select(select.length > 0 ? select : null)
@@ -190,13 +198,17 @@ export function BaseService<T>(
       delete where.select;
 
       const queryBuilder = this.genericRepository.createQueryBuilder('entity');
+      if (where.deleted) {
+        queryBuilder.withDeleted();
+        delete where.deleted;
+      }
 
       queryBuilder
         .select(select.length > 0 ? select.map((s) => `entity.${s}`) : null)
         .where(where);
 
-      if (Object.keys(relations).length > 0) {
-        Object.keys(relations).forEach((relation) => {
+      if (relations.length > 0) {
+        relations.forEach((relation) => {
           queryBuilder.leftJoinAndSelect(`entity.${relation}`, relation);
         });
       }
@@ -277,6 +289,11 @@ export function BaseService<T>(
 
       if (softDelete) {
         await queryBuilder.softDelete().where('id = :id', { id }).execute();
+        await queryBuilder
+          .update()
+          .set({ restored_by: null, restored_at: null } as any)
+          .where('id = :id', { id })
+          .execute();
 
         if (activeUser) {
           await queryBuilder
@@ -302,6 +319,11 @@ export function BaseService<T>(
 
       if (softDelete) {
         await queryBuilder.softDelete().whereInIds(ids).execute();
+        await queryBuilder
+          .update()
+          .set({ restored_by: null, restored_at: null } as any)
+          .whereInIds(ids)
+          .execute();
 
         if (activeUser) {
           await queryBuilder
@@ -323,42 +345,44 @@ export function BaseService<T>(
       id: number,
       activeUser?: ActiveUserData,
     ): Promise<any> {
-      const updateData = activeUser
-        ? {
-            deleted: false,
-            restored_at: new Date(),
-            restored_by: activeUser.sub,
-          }
-        : { deleted: false, restored_at: new Date() };
-
       const queryBuilder = this.genericRepository.createQueryBuilder();
 
+      await queryBuilder.restore().where('id = :id', { id }).execute();
       await queryBuilder
         .update()
-        .set(updateData as QueryDeepPartialEntity<T>)
+        .set({ restored_at: new Date(), deleted_by: null } as any)
         .where('id = :id', { id })
         .execute();
+
+      if (activeUser) {
+        await queryBuilder
+          .update()
+          .set({ restored_by: activeUser.sub } as any)
+          .where('id = :id', { id })
+          .execute();
+      }
     }
 
     public async restoreMany(
       ids: number[],
       activeUser?: ActiveUserData,
     ): Promise<any> {
-      const updateData = activeUser
-        ? {
-            deleted: false,
-            restored_at: new Date(),
-            restored_by: activeUser.sub,
-          }
-        : { deleted: false, restored_at: new Date() };
-
       const queryBuilder = this.genericRepository.createQueryBuilder();
 
+      await queryBuilder.restore().whereInIds(ids).execute();
       await queryBuilder
         .update()
-        .set(updateData as QueryDeepPartialEntity<T>)
+        .set({ restored_at: new Date(), deleted_by: null } as any)
         .whereInIds(ids)
         .execute();
+
+      if (activeUser) {
+        await queryBuilder
+          .update()
+          .set({ restored_by: activeUser.sub } as any)
+          .whereInIds(ids)
+          .execute();
+      }
     }
 
     public async count(conditions: Params = {}): Promise<number> {
