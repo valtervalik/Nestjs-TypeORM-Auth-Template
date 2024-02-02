@@ -5,7 +5,9 @@ import {
   Entity,
   Generated,
   JoinColumn,
+  JoinTable,
   ManyToOne,
+  OneToMany,
   OneToOne,
 } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
@@ -25,19 +27,21 @@ export class User extends Base {
   @ManyToOne((type) => Role, (role) => role.user)
   role: Role;
 
-  @OneToOne(() => Permission, (permission) => permission.created_by, {
+  @JoinTable()
+  @OneToMany(() => Permission, (permission) => permission.created_by, {
     cascade: true,
   })
-  @OneToOne(() => Permission, (permission) => permission.deleted_by, {
+  @OneToMany(() => Permission, (permission) => permission.deleted_by, {
     cascade: true,
   })
-  @OneToOne(() => Permission, (permission) => permission.updated_by, {
+  @OneToMany(() => Permission, (permission) => permission.updated_by, {
     cascade: true,
   })
-  @OneToOne(() => Permission, (permission) => permission.restored_by, {
+  @OneToMany(() => Permission, (permission) => permission.restored_by, {
     cascade: true,
   })
   @JoinColumn()
+  @OneToOne(() => Permission, (permission) => permission.user)
   permission: Permission;
 
   @Column({ default: false })
@@ -49,19 +53,19 @@ export class User extends Base {
   @Column({ nullable: true })
   googleId?: string;
 
-  @OneToOne(() => User, (user) => user.created_by)
-  @JoinColumn()
+  @JoinTable()
+  @ManyToOne(() => User, (user) => user.created_by)
   created_by: User;
 
-  @OneToOne(() => User, (user) => user.deleted_by)
-  @JoinColumn()
+  @JoinTable()
+  @ManyToOne(() => User, (user) => user.deleted_by)
   deleted_by: User;
 
-  @OneToOne(() => User, (user) => user.updated_by)
-  @JoinColumn()
+  @JoinTable()
+  @ManyToOne(() => User, (user) => user.updated_by)
   updated_by: User;
 
-  @OneToOne(() => User, (user) => user.restored_by)
-  @JoinColumn()
+  @JoinTable()
+  @ManyToOne(() => User, (user) => user.restored_by)
   restored_by: User;
 }
