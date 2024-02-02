@@ -12,23 +12,37 @@ import { Roles } from 'src/auth/authorization/decorators/roles.decorator';
 import { ActiveUser } from 'src/auth/decorators/active-user.decorator';
 import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { UserRoles } from 'src/roles/enums/user-roles.enum';
+import { TypedEventEmitter } from 'src/types/typed-event-emitter/typed-event-emitter.class';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UsersService } from './users.service';
 
-@Roles(UserRoles.Super)
+@Roles(UserRoles.SUPER)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly eventEmitter: TypedEventEmitter,
+  ) {}
 
   @Post()
-  create(
+  async create(
     @Body() createUserDto: CreateUserDto,
     @ActiveUser() activeUser: ActiveUserData,
   ) {
     const password = this.usersService.generatePassword(12);
 
-    return this.usersService.create({ ...createUserDto, password }, activeUser);
+    const user = await this.usersService.create(
+      { ...createUserDto, password },
+      activeUser,
+    );
+
+    this.eventEmitter.emit('user.welcome', {
+      email: createUserDto.email,
+      password,
+    });
+
+    return user;
   }
 
   @Get()
