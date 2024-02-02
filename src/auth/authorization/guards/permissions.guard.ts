@@ -20,7 +20,7 @@ export class PermissionsGuard implements CanActivate {
       REQUEST_USER_KEY
     ];
 
-    if (user.role.name === UserRoles.Super) return true;
+    if (user.role.name === UserRoles.SUPER) return true;
 
     return contextPermissions.every(
       (permission) => user.permission && user.permission[permission],
