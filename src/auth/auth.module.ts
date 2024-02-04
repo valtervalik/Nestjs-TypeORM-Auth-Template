@@ -13,9 +13,7 @@ import { AuthenticationService } from './authentication/authentication.service';
 import { AccessTokenGuard } from './authentication/guards/access-token.guard';
 import { AuthGuard } from './authentication/guards/auth.guard';
 import { RefreshTokenIdsStorage } from './authentication/refresh-token-ids.storage/refresh-token-ids.storage';
-import { GoogleAuthController } from './authentication/social/google-auth/google-auth.controller';
-import { GoogleAuthService } from './authentication/social/google-auth/google-auth.service';
-import { TFAAuthService } from './authentication/tfa-auth.service';
+import { TwoFactorAuthService } from './authentication/two-factor-auth/two-factor-auth.service';
 import { PermissionsGuard } from './authorization/guards/permissions.guard';
 import { RolesGuard } from './authorization/guards/roles.guard';
 import jwtConfig from './config/jwt.config';
@@ -37,10 +35,10 @@ import jwtConfig from './config/jwt.config';
     AccessTokenGuard,
     RefreshTokenIdsStorage,
     AuthenticationService,
-    TFAAuthService,
-    GoogleAuthService,
+    TwoFactorAuthService,
     UserSubscriber,
   ],
-  controllers: [AuthenticationController, GoogleAuthController],
+  controllers: [AuthenticationController],
+  exports: [AuthenticationService],
 })
 export class AuthModule {}
