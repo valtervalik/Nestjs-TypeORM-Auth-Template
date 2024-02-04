@@ -21,8 +21,12 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
   }
 
   async beforeInsert(event: InsertEvent<User>) {
-    event.entity.password = await this.hashingService.hash(
-      event.entity.password,
-    );
+    const { password } = event.entity;
+
+    password
+      ? (event.entity.password = await this.hashingService.hash(
+          event.entity.password,
+        ))
+      : null;
   }
 }
