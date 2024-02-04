@@ -1,8 +1,8 @@
 import { Body, Controller, Post, Res } from '@nestjs/common';
 import { Response } from 'express';
-import { Auth } from '../../decorators/auth.decorator';
-import { GoogleTokenDto } from '../../dto/google-token.dto';
-import { AuthType } from '../../enums/auth-type.enum';
+import { Auth } from '../auth/authentication/decorators/auth.decorator';
+import { GoogleTokenDto } from '../auth/authentication/dto/google-token.dto';
+import { AuthType } from '../auth/authentication/enums/auth-type.enum';
 import { GoogleAuthService } from './google-auth.service';
 
 @Auth(AuthType.None)

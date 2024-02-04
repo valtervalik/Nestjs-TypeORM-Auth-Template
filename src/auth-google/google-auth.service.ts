@@ -8,9 +8,10 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
+import { TypedEventEmitter } from 'src/types/typed-event-emitter/typed-event-emitter.class';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
-import { AuthenticationService } from '../../authentication.service';
+import { AuthenticationService } from '../auth/authentication/authentication.service';
 
 @Injectable()
 export class GoogleAuthService implements OnModuleInit {
@@ -20,6 +21,7 @@ export class GoogleAuthService implements OnModuleInit {
     private readonly configService: ConfigService,
     private readonly authenticationService: AuthenticationService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
+    private readonly eventEmitter: TypedEventEmitter,
   ) {}
 
   onModuleInit() {
@@ -40,6 +42,11 @@ export class GoogleAuthService implements OnModuleInit {
         return this.authenticationService.generateTokens(user, response);
       } else {
         const newUser = await this.userRepository.save({ email, googleId });
+
+        this.eventEmitter.emit('user.welcome', {
+          email: newUser.email,
+        });
+
         return this.authenticationService.generateTokens(newUser, response);
       }
     } catch (err) {
