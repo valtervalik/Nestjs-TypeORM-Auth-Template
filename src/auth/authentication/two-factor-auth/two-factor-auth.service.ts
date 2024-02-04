@@ -7,7 +7,7 @@ import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
-export class TFAAuthService {
+export class TwoFactorAuthService {
   constructor(
     private readonly configService: ConfigService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
