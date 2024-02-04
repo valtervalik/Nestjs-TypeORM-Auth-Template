@@ -13,7 +13,7 @@ import {
   InvalidateRefreshTokenError,
   RefreshTokenIdsStorage,
 } from './refresh-token-ids.storage/refresh-token-ids.storage';
-import { TFAAuthService } from './tfa-auth.service';
+import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service';
 
 @Injectable()
 export class AuthenticationService extends BaseService<User>(User) {
@@ -23,7 +23,7 @@ export class AuthenticationService extends BaseService<User>(User) {
     @Inject(jwtConfig.KEY)
     private readonly jwtConfiguration: ConfigType<typeof jwtConfig>,
     private readonly refreshTokenIdsStorage: RefreshTokenIdsStorage,
-    private readonly tfaAuthService: TFAAuthService,
+    private readonly twoFactorAuthService: TwoFactorAuthService,
   ) {
     super();
   }
@@ -36,7 +36,7 @@ export class AuthenticationService extends BaseService<User>(User) {
     });
 
     if (!user) {
-      throw new UnauthorizedException('User does not exist');
+      throw new UnauthorizedException('Bad credentials');
     }
 
     if (!user.password) {
@@ -52,12 +52,15 @@ export class AuthenticationService extends BaseService<User>(User) {
     );
 
     if (!isValidPassword) {
-      throw new UnauthorizedException('Password does not match');
+      throw new UnauthorizedException('Bad credentials');
     }
 
     if (
       user.isTFAEnabled &&
-      !this.tfaAuthService.verifyCode(signInDto.tfaCode, user.tfaSecret)
+      !(await this.twoFactorAuthService.verifyCode(
+        signInDto.tfaCode,
+        user.tfaSecret,
+      ))
     ) {
       throw new UnauthorizedException('Invalid 2FA code');
     }
