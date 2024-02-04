@@ -1,5 +1,5 @@
 import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { EjsAdapter } from '@nestjs-modules/mailer/dist/adapters/ejs.adapter';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { join } from 'path';
@@ -25,7 +25,7 @@ import { EMailerService } from './e-mailer.service';
         },
         template: {
           dir: join(__dirname, '/templates'),
-          adapter: new HandlebarsAdapter(),
+          adapter: new EjsAdapter(),
           options: {
             strict: false,
           },
