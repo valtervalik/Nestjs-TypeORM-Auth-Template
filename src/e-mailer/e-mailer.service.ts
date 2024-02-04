@@ -9,7 +9,7 @@ export class EMailerService {
 
   @OnEvent('user.welcome')
   async welcomeEmail(data: EventPayloads['user.welcome']) {
-    const { email, password } = data;
+    const { email } = data;
 
     const subject = `Welcome: ${email}`;
 
@@ -19,7 +19,6 @@ export class EMailerService {
       template: './welcome',
       context: {
         email,
-        password,
       },
     });
   }
