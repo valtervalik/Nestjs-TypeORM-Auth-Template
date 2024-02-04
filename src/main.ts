@@ -1,4 +1,5 @@
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
@@ -7,6 +8,7 @@ import { TimeoutInterceptor } from './common/interceptors/timeout.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService);
 
   app.enableCors();
   app.use(cookieParser());
@@ -25,6 +27,6 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
   app.useGlobalInterceptors(new TimeoutInterceptor());
 
-  await app.listen(parseInt(process.env.PORT, 10));
+  await app.listen(configService.get<number>('APP_PORT'));
 }
 bootstrap();
