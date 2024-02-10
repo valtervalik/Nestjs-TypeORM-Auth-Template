@@ -11,11 +11,11 @@ import { ActiveUserData } from 'src/auth/interfaces/active-user-data.interface';
 import { Repository } from 'typeorm';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import {
+  CustomUpdateOptions,
   IBaseService,
   Pagination,
   PaginationResult,
   Params,
-  UpdatedNew,
 } from './base-interfaces';
 
 type BaseServiceOptions = {
@@ -268,7 +268,7 @@ export function BaseService<T>(
       id: number,
       updateDto: Params,
       activeUser?: ActiveUserData,
-      otp: UpdatedNew = { new: false },
+      otp: CustomUpdateOptions = { new: false },
     ): Promise<T | any> {
       try {
         const updateData = activeUser
@@ -295,7 +295,7 @@ export function BaseService<T>(
       ids: number[],
       conditions: Params,
       activeUser?: ActiveUserData,
-      otp: UpdatedNew = { new: false },
+      otp: CustomUpdateOptions = { new: false },
     ): Promise<T[] | any> {
       try {
         const updateData = activeUser

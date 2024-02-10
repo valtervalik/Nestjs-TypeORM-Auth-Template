@@ -63,7 +63,7 @@ export interface PaginationResult {
   lastPage: number;
 }
 
-export interface UpdatedNew {
+export interface CustomUpdateOptions {
   new: boolean;
 }
 
