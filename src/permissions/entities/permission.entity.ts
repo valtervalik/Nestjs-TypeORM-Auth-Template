@@ -19,15 +19,15 @@ export class Permission extends Base {
   @OneToOne(() => User, (user) => user.permission)
   user: User;
 
-  @ManyToOne(() => User, (user) => user.permission)
+  @ManyToOne(() => User)
   created_by: User;
 
-  @ManyToOne(() => User, (user) => user.permission)
+  @ManyToOne(() => User)
   deleted_by: User;
 
-  @ManyToOne(() => User, (user) => user.permission)
+  @ManyToOne(() => User)
   updated_by: User;
 
-  @ManyToOne(() => User, (user) => user.permission)
+  @ManyToOne(() => User)
   restored_by: User;
 }

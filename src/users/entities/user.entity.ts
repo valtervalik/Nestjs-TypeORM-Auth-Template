@@ -7,7 +7,6 @@ import {
   JoinColumn,
   JoinTable,
   ManyToOne,
-  OneToMany,
   OneToOne,
 } from 'typeorm';
 import { Role } from '../../roles/entities/role.entity';
@@ -24,22 +23,9 @@ export class User extends Base {
   @Column({ nullable: true, select: false })
   password?: string;
 
-  @ManyToOne((type) => Role, (role) => role.user)
+  @ManyToOne((type) => Role)
   role: Role;
 
-  @JoinTable()
-  @OneToMany(() => Permission, (permission) => permission.created_by, {
-    cascade: true,
-  })
-  @OneToMany(() => Permission, (permission) => permission.deleted_by, {
-    cascade: true,
-  })
-  @OneToMany(() => Permission, (permission) => permission.updated_by, {
-    cascade: true,
-  })
-  @OneToMany(() => Permission, (permission) => permission.restored_by, {
-    cascade: true,
-  })
   @JoinColumn()
   @OneToOne(() => Permission, (permission) => permission.user)
   permission: Permission;
