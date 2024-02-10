@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { GoogleAuthModule } from './auth-google/google-auth.module';
 import { AuthModule } from './auth/auth.module';
 import { DatabaseModule } from './database/database.module';
 import { EMailerModule } from './e-mailer/e-mailer.module';
 import { TypedEventEmitterModule } from './types/typed-event-emitter/typed-event-emitter.module';
-import { GoogleAuthModule } from './auth-google/google-auth.module';
 
 @Module({
   imports: [
