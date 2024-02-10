@@ -63,6 +63,10 @@ export interface PaginationResult {
   lastPage: number;
 }
 
+export interface UpdatedNew {
+  new: boolean;
+}
+
 export interface Params {
   [key: string]: any;
 }
