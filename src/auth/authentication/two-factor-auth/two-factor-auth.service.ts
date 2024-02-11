@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { authenticator } from 'otplib';
@@ -31,18 +31,22 @@ export class TwoFactorAuthService {
   async enableTFAForUser(email: string, secret: string) {
     const encrypted = await this.encryptingService.encrypt(secret);
 
-    const { id } = await this.userRepository.findOneOrFail({
-      where: { email },
-      select: { id: true },
-    });
-
-    if (!id) {
-      throw new BadRequestException('User not found');
+    try {
+      await this.userRepository.update(
+        { email },
+        { tfaSecret: encrypted, isTFAEnabled: true },
+      );
+    } catch (err) {
+      throw new NotFoundException('No user found');
     }
+  }
 
-    await this.userRepository.update(
-      { id },
-      { tfaSecret: encrypted, isTFAEnabled: true },
-    );
+  async disableTFAForUser(email: string) {
+    try {
+      await this.userRepository.update({ email }, { isTFAEnabled: false });
+      return;
+    } catch {
+      throw new NotFoundException('No user found');
+    }
   }
 }

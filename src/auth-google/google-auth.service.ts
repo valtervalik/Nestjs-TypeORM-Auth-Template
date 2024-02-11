@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
-import { TypedEventEmitter } from 'src/types/typed-event-emitter/typed-event-emitter.class';
+import { TypedEventEmitter } from 'src/common/types/typed-event-emitter/typed-event-emitter.class';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { AuthenticationService } from '../auth/authentication/authentication.service';

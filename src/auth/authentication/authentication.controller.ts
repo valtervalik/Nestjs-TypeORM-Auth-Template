@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { toFileStream } from 'qrcode';
-import { TypedEventEmitter } from 'src/types/typed-event-emitter/typed-event-emitter.class';
+import { TypedEventEmitter } from 'src/common/types/typed-event-emitter/typed-event-emitter.class';
 import { ActiveUser } from '../decorators/active-user.decorator';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { AuthenticationService } from './authentication.service';
@@ -42,11 +42,19 @@ export class AuthenticationController {
 
   @HttpCode(HttpStatus.OK)
   @Post('sign-in')
-  signIn(
+  async signIn(
     @Body() signInDto: SignInDto,
     @Res({ passthrough: true }) response: Response,
   ) {
-    return this.authenticationService.signIn(signInDto, response);
+    const { email, password, tfaCode } = signInDto;
+
+    const user = await this.authenticationService.validateUser(
+      email,
+      password,
+      tfaCode,
+    );
+
+    return await this.authenticationService.generateTokens(user, response);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -69,9 +77,17 @@ export class AuthenticationController {
     const { secret, uri } = await this.twoFactorAuthService.generateSecret(
       activeUser.email,
     );
+
     await this.twoFactorAuthService.enableTFAForUser(activeUser.email, secret);
     response.type('png');
     return toFileStream(response, uri);
+  }
+
+  @Auth(AuthType.Bearer)
+  @HttpCode(HttpStatus.OK)
+  @Post('2fa/disable')
+  async disableTFA(@ActiveUser() activeUser: ActiveUserData) {
+    return await this.twoFactorAuthService.disableTFAForUser(activeUser.email);
   }
 
   @Get('logout')

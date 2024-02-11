@@ -8,7 +8,6 @@ import { HashingService } from 'src/common/hashing/hashing.service';
 import { User } from 'src/users/entities/user.entity';
 import jwtConfig from '../config/jwt.config';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
-import { SignInDto } from './dto/sign-in.dto';
 import {
   InvalidateRefreshTokenError,
   RefreshTokenIdsStorage,
@@ -26,46 +25,6 @@ export class AuthenticationService extends BaseService<User>(User) {
     private readonly twoFactorAuthService: TwoFactorAuthService,
   ) {
     super();
-  }
-
-  async signIn(signInDto: SignInDto, response: Response) {
-    const user = await this.genericRepository.findOne({
-      where: { email: signInDto.email },
-      relations: { role: true, permission: true },
-      select: ['id', 'email', 'password', 'isTFAEnabled', 'tfaSecret'],
-    });
-
-    if (!user) {
-      throw new UnauthorizedException('Bad credentials');
-    }
-
-    if (!user.password) {
-      if (user.googleId) {
-        throw new UnauthorizedException('Login with your Google account');
-      }
-      throw new UnauthorizedException();
-    }
-
-    const isValidPassword = await this.hashingService.compare(
-      signInDto.password,
-      user.password,
-    );
-
-    if (!isValidPassword) {
-      throw new UnauthorizedException('Bad credentials');
-    }
-
-    if (
-      user.isTFAEnabled &&
-      !(await this.twoFactorAuthService.verifyCode(
-        signInDto.tfaCode,
-        user.tfaSecret,
-      ))
-    ) {
-      throw new UnauthorizedException('Invalid 2FA code');
-    }
-
-    return await this.generateTokens(user, response);
   }
 
   async refreshToken(refreshToken: string, response: Response) {
@@ -141,5 +100,45 @@ export class AuthenticationService extends BaseService<User>(User) {
       secure: true,
     });
     return { accessToken };
+  }
+
+  async validateUser(
+    email: string,
+    password: string,
+    tfaCode?: string,
+  ): Promise<User> {
+    const user = await this.genericRepository.findOne({
+      where: { email },
+      relations: { role: true, permission: true },
+      select: ['id', 'email', 'password', 'isTFAEnabled', 'tfaSecret'],
+    });
+
+    if (!user) {
+      throw new UnauthorizedException('Bad credentials');
+    }
+
+    if (!user.password) {
+      if (user.googleId) {
+        throw new UnauthorizedException('Login with your Google account');
+      }
+      throw new UnauthorizedException();
+    }
+
+    const isValidPassword = await this.hashingService.compare(
+      password,
+      user.password,
+    );
+
+    if (!isValidPassword) {
+      throw new UnauthorizedException('Bad credentials');
+    }
+
+    if (
+      user.isTFAEnabled &&
+      !(await this.twoFactorAuthService.verifyCode(tfaCode, user.tfaSecret))
+    ) {
+      throw new UnauthorizedException('Invalid 2FA code');
+    }
+    return user;
   }
 }
