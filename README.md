@@ -46,8 +46,6 @@ pnpm install
 docker-compose up -d
 ```
 
-5. **Set your environment variables**: Set up your environment variables based on the `.env.example` file in the repository.
-
 6. **Run the application in development mode**: Use any of the following commands to start the application in development mode.
 
 ```bash
