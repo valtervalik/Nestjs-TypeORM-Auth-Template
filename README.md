@@ -5,7 +5,7 @@
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
-<h1 align="center"> Nestjs Authentication and Authorization Module with PostgreSQL and Redis </h1>
+<h1 align="center"> Nestjs Authentication and Authorization Module with TypeORM(PostgreSQL) and Redis </h1>
 
 ## Description
 
@@ -18,13 +18,14 @@ In addition to these features, this template provides Two Factor Authentication 
 1. **Clone the repository**: Use git clone command to clone the repository to your local machine.
 
 ```bash
-git clone https://github.com/valtervalik/Nestjs-auth-template.git
+git clone --depth 1 https://github.com/valtervalik/Nestjs-TypeORM-Auth-Template.git my-app
 ```
 
-2. **Enter the project folder**:
+2. **Enter the project folder and copy .env.example as .env**:
 
 ```bash
-cd Nestjs-auth-template
+cd my-app
+cp .env.example .env
 ```
 
 3. **Install dependencies**: Run any of the following commands to install all the necessary dependencies.
