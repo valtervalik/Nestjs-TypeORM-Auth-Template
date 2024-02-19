@@ -7,6 +7,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { toFileStream } from 'qrcode';
@@ -15,9 +16,9 @@ import { ActiveUser } from '../decorators/active-user.decorator';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { AuthenticationService } from './authentication.service';
 import { Auth } from './decorators/auth.decorator';
-import { SignInDto } from './dto/sign-in.dto';
 import { SignUpDto } from './dto/sign-up.dto';
 import { AuthType } from './enums/auth-type.enum';
+import { LocalAuthGuard } from './guards/local-auth.guard';
 import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service';
 
 @Auth(AuthType.None)
@@ -40,21 +41,14 @@ export class AuthenticationController {
     return user;
   }
 
+  @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('sign-in')
-  async signIn(
-    @Body() signInDto: SignInDto,
-    @Res({ passthrough: true }) response: Response,
-  ) {
-    const { email, password, tfaCode } = signInDto;
-
-    const user = await this.authenticationService.validateUser(
-      email,
-      password,
-      tfaCode,
+  async signIn(@Req() request, @Res({ passthrough: true }) response: Response) {
+    return await this.authenticationService.generateTokens(
+      request.user,
+      response,
     );
-
-    return await this.authenticationService.generateTokens(user, response);
   }
 
   @HttpCode(HttpStatus.OK)
