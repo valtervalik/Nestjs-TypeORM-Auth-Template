@@ -104,7 +104,7 @@ export class AuthenticationService extends BaseService<User>(User) {
 
   async validateUser(
     email: string,
-    password: string,
+    pass: string,
     tfaCode?: string,
   ): Promise<User> {
     const user = await this.genericRepository.findOne({
@@ -125,7 +125,7 @@ export class AuthenticationService extends BaseService<User>(User) {
     }
 
     const isValidPassword = await this.hashingService.compare(
-      password,
+      pass,
       user.password,
     );
 
@@ -139,6 +139,9 @@ export class AuthenticationService extends BaseService<User>(User) {
     ) {
       throw new UnauthorizedException('Invalid 2FA code');
     }
-    return user;
+
+    const { password, ...rest } = user;
+
+    return rest;
   }
 }
