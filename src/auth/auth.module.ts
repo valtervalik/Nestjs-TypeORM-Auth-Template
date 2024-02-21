@@ -10,9 +10,11 @@ import { UserSubscriber } from 'src/subscribers/user.subscriber';
 import { UsersModule } from 'src/users/users.module';
 import { AuthenticationController } from './authentication/authentication.controller';
 import { AuthenticationService } from './authentication/authentication.service';
-import { AccessTokenGuard } from './authentication/guards/access-token.guard';
 import { AuthGuard } from './authentication/guards/auth.guard';
+import { JwtAuthGuard } from './authentication/guards/jwt-auth.guard';
 import { RefreshTokenIdsStorage } from './authentication/refresh-token-ids.storage/refresh-token-ids.storage';
+import { JwtStrategy } from './authentication/strategies/jwt.strategy';
+import { LocalStrategy } from './authentication/strategies/local.strategy';
 import { TwoFactorAuthService } from './authentication/two-factor-auth/two-factor-auth.service';
 import { PermissionsGuard } from './authorization/guards/permissions.guard';
 import { RolesGuard } from './authorization/guards/roles.guard';
@@ -32,11 +34,13 @@ import jwtConfig from './config/jwt.config';
     { provide: APP_GUARD, useClass: AuthGuard },
     { provide: APP_GUARD, useClass: RolesGuard },
     { provide: APP_GUARD, useClass: PermissionsGuard },
-    AccessTokenGuard,
+    JwtAuthGuard,
     RefreshTokenIdsStorage,
     AuthenticationService,
     TwoFactorAuthService,
     UserSubscriber,
+    LocalStrategy,
+    JwtStrategy,
   ],
   controllers: [AuthenticationController],
   exports: [AuthenticationService],

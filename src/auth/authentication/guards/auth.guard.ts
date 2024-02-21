@@ -7,7 +7,7 @@ import {
 import { Reflector } from '@nestjs/core';
 import { AUTH_TYPE_KEY } from 'src/auth/auth.constants';
 import { AuthType } from '../enums/auth-type.enum';
-import { AccessTokenGuard } from './access-token.guard';
+import { JwtAuthGuard } from './jwt-auth.guard';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -16,13 +16,13 @@ export class AuthGuard implements CanActivate {
     AuthType,
     CanActivate | CanActivate[]
   > = {
-    [AuthType.Bearer]: this.accessTokenGuard,
+    [AuthType.Bearer]: this.jwtAuthGuard,
     [AuthType.None]: { canActivate: () => true },
   };
 
   constructor(
     private readonly reflector: Reflector,
-    private readonly accessTokenGuard: AccessTokenGuard,
+    private readonly jwtAuthGuard: JwtAuthGuard,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
