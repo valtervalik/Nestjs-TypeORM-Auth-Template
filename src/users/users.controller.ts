@@ -50,7 +50,12 @@ export class UsersController {
     @Body() updateUserDto: UpdateUserDto,
     @ActiveUser() activeUser: ActiveUserData,
   ) {
-    return this.usersService.update(+id, updateUserDto, activeUser);
+    return this.usersService.update(
+      +id,
+      updateUserDto,
+      { new: true },
+      activeUser,
+    );
   }
 
   @Delete(':id')

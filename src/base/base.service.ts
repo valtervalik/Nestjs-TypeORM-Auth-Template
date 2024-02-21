@@ -267,8 +267,8 @@ export function BaseService<T>(
     public async update(
       id: number,
       updateDto: Params,
+      options: CustomUpdateOptions,
       activeUser?: ActiveUserData,
-      otp: CustomUpdateOptions = { new: false },
     ): Promise<T | any> {
       try {
         const updateData = activeUser
@@ -283,7 +283,7 @@ export function BaseService<T>(
           .where('id = :id', { id })
           .execute();
 
-        if (otp.new) {
+        if (options.new) {
           return await queryBuilder.where('id = :id', { id }).getOne();
         }
       } catch (err) {
@@ -294,8 +294,8 @@ export function BaseService<T>(
     public async updateMany(
       ids: number[],
       conditions: Params,
+      options: CustomUpdateOptions,
       activeUser?: ActiveUserData,
-      otp: CustomUpdateOptions = { new: false },
     ): Promise<T[] | any> {
       try {
         const updateData = activeUser
@@ -310,7 +310,7 @@ export function BaseService<T>(
           .whereInIds(ids)
           .execute();
 
-        if (otp.new) {
+        if (options.new) {
           return await queryBuilder.whereInIds(ids).getMany();
         }
       } catch (err) {
