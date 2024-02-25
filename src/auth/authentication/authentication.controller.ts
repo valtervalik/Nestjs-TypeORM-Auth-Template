@@ -52,7 +52,7 @@ export class AuthenticationController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Post('refresh-token')
+  @Post('refresh')
   refreshToken(
     @Req() request: Request,
     @Res({ passthrough: true }) response: Response,
