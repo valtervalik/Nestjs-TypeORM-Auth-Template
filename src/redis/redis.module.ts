@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Redis } from 'ioredis';
-import { parse } from 'path';
+import { AllConfigType } from 'src/config/config.type';
 
 @Module({})
 export class RedisModule {
+  constructor(private readonly configService: ConfigService<AllConfigType>) {}
+
   provideRedisClient() {
     return new Redis({
-      host: process.env.REDIS_HOST,
-      port: parseInt(process.env.REDIS_PORT, 10),
+      host: this.configService.getOrThrow('redis.host', { infer: true }),
+      port: this.configService.getOrThrow('redis.port', { infer: true }),
     });
   }
 }

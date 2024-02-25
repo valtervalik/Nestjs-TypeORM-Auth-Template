@@ -1,21 +1,24 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createCipheriv, createDecipheriv } from 'crypto';
+import { AllConfigType } from 'src/config/config.type';
 import { EncryptingService } from './encrypting.service';
 
 @Injectable()
 export class CryptoService implements EncryptingService {
-  private readonly algorithm =
-    this.configService.get<string>('CRYPTO_ALGORITHM');
+  private readonly algorithm = this.configService.get<string>(
+    'crypto.algorithm',
+    { infer: true },
+  );
   private readonly key = Buffer.from(
-    this.configService.get<string>('CRYPTO_KEY'),
+    this.configService.get<string>('crypto.key', { infer: true }),
     'hex',
   );
   private readonly iv = Buffer.from(
-    this.configService.get<string>('CRYPTO_IV'),
+    this.configService.get<string>('crypto.iv', { infer: true }),
     'hex',
   );
-  constructor(private readonly configService: ConfigService) {}
+  constructor(private readonly configService: ConfigService<AllConfigType>) {}
 
   async encrypt(str: string): Promise<string> {
     let cipher = createCipheriv(this.algorithm, this.key, this.iv);

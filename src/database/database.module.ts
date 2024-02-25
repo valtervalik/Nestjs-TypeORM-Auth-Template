@@ -1,18 +1,21 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AllConfigType } from 'src/config/config.type';
 
 @Module({
   imports: [
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
+      useFactory: async (configService: ConfigService<AllConfigType>) => ({
         type: 'postgres',
-        host: configService.get<string>('DB_HOST'),
-        port: configService.get<number>('DB_PORT') as number,
-        username: configService.get<string>('DB_USER'),
-        password: configService.get<string>('DB_PASSWORD'),
-        database: configService.get<string>('DB_NAME'),
+        host: configService.getOrThrow('database.host', { infer: true }),
+        port: configService.getOrThrow('database.port', { infer: true }),
+        username: configService.getOrThrow('database.user', { infer: true }),
+        password: configService.getOrThrow('database.password', {
+          infer: true,
+        }),
+        database: configService.getOrThrow('database.name', { infer: true }),
         autoLoadEntities: true,
         //Set synchronize to true for development only
         synchronize: true,

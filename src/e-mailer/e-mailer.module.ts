@@ -11,17 +11,17 @@ import { EMailerService } from './e-mailer.service';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         transport: {
-          service: configService.get<string>('EMAIL_SERVICE'),
+          service: configService.getOrThrow('emailer.service', { infer: true }),
           secure: false,
           auth: {
-            user: configService.get<string>('EMAIL_USER'),
-            pass: configService.get<string>('EMAIL_PASSKEY'),
+            user: configService.getOrThrow('emailer.user', { infer: true }),
+            pass: configService.getOrThrow('emailer.passkey', { infer: true }),
           },
         },
         defaults: {
-          from: `"${configService.get<string>(
-            'EMAIL_USERNAME',
-          )}" <${configService.get<string>('EMAIL_USER')}>`,
+          from: `"${configService.getOrThrow('emailer.username', {
+            infer: true,
+          })}" <${configService.getOrThrow('emailer.user', { infer: true })}}>`,
         },
         template: {
           dir: join(__dirname, '/templates'),

@@ -3,7 +3,9 @@ import {
   OnApplicationBootstrap,
   OnApplicationShutdown,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Redis } from 'ioredis';
+import { AllConfigType } from 'src/config/config.type';
 import { RedisModule } from 'src/redis/redis.module';
 
 export class InvalidateRefreshTokenError extends Error {}
@@ -14,8 +16,10 @@ export class RefreshTokenIdsStorage
 {
   private redisClient: Redis;
 
+  constructor(private readonly configService: ConfigService<AllConfigType>) {}
+
   onApplicationBootstrap() {
-    const redisModule = new RedisModule();
+    const redisModule = new RedisModule(this.configService);
     this.redisClient = redisModule.provideRedisClient();
   }
 

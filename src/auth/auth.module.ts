@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { EncryptingModule } from 'src/common/encrypting/encrypting.module';
@@ -18,7 +17,7 @@ import { LocalStrategy } from './authentication/strategies/local.strategy';
 import { TwoFactorAuthService } from './authentication/two-factor-auth/two-factor-auth.service';
 import { PermissionsGuard } from './authorization/guards/permissions.guard';
 import { RolesGuard } from './authorization/guards/roles.guard';
-import jwtConfig from './config/jwt.config';
+import jwtConfig from './config/auth.config';
 
 @Module({
   imports: [
@@ -26,7 +25,6 @@ import jwtConfig from './config/jwt.config';
     RolesModule,
     UsersModule,
     JwtModule.registerAsync(jwtConfig.asProvider()),
-    ConfigModule.forFeature(jwtConfig),
     HashingModule,
     EncryptingModule,
   ],
