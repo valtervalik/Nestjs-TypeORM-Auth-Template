@@ -86,7 +86,7 @@ export class AuthenticationController {
 
   @Get('logout')
   logout(@Res({ passthrough: true }) response: Response) {
-    response.clearCookie('refresh_token', { path: '/auth/refresh-token' });
+    response.clearCookie('refresh_token', { path: '/auth/refresh' });
     return { message: 'Logout successful' };
   }
 }
