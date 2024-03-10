@@ -13,7 +13,12 @@ export class TwoFactorAuthService {
     private readonly configService: ConfigService<AllConfigType>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly encryptingService: EncryptingService,
-  ) {}
+  ) {
+    this.encryptingService.setKeys(
+      this.configService.get('crypto.privateKey', { infer: true }),
+      this.configService.get('crypto.publicKey', { infer: true }),
+    );
+  }
 
   async generateSecret(email: string) {
     const secret = authenticator.generateSecret();
@@ -24,13 +29,14 @@ export class TwoFactorAuthService {
   }
 
   async verifyCode(code: string, encryptedSecret: string) {
-    const decrypted = await this.encryptingService.decrypt(encryptedSecret);
+    const decrypted =
+      await this.encryptingService.decryptWithPrivateKey(encryptedSecret);
 
     return authenticator.verify({ token: code, secret: decrypted });
   }
 
   async enableTFAForUser(email: string, secret: string) {
-    const encrypted = await this.encryptingService.encrypt(secret);
+    const encrypted = await this.encryptingService.encryptWithPublicKey(secret);
 
     try {
       await this.userRepository.update(
