@@ -1,32 +1,32 @@
 import {
   ConflictException,
-  Inject,
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
+import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
 import { TypedEventEmitter } from 'src/common/types/typed-event-emitter/typed-event-emitter.class';
+import { AllConfigType } from 'src/config/config.type';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { AuthenticationService } from '../auth/authentication/authentication.service';
-import googleConfig from './config/google.config';
 
 @Injectable()
 export class GoogleAuthService {
   private oauthClient: OAuth2Client;
 
   constructor(
-    @Inject(googleConfig.KEY)
-    private readonly googleConfiguration: ConfigType<typeof googleConfig>,
+    private readonly configService: ConfigService<AllConfigType>,
     private readonly authenticationService: AuthenticationService,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     private readonly eventEmitter: TypedEventEmitter,
   ) {
-    const clientId = this.googleConfiguration.clientId;
-    const clientSecret = this.googleConfiguration.clientSecret;
+    const clientId = this.configService.get('google.clientId', { infer: true });
+    const clientSecret = this.configService.get('google.clientSecret', {
+      infer: true,
+    });
     this.oauthClient = new OAuth2Client(clientId, clientSecret);
   }
 
