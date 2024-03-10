@@ -1,36 +1,43 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { createCipheriv, createDecipheriv } from 'crypto';
-import { AllConfigType } from 'src/config/config.type';
+import {
+  privateDecrypt,
+  privateEncrypt,
+  publicDecrypt,
+  publicEncrypt,
+} from 'crypto';
 import { EncryptingService } from './encrypting.service';
+import { KeysService } from './keys.service';
 
 @Injectable()
 export class CryptoService implements EncryptingService {
-  private readonly algorithm = this.configService.get<string>(
-    'crypto.algorithm',
-    { infer: true },
-  );
-  private readonly key = Buffer.from(
-    this.configService.get<string>('crypto.key', { infer: true }),
-    'hex',
-  );
-  private readonly iv = Buffer.from(
-    this.configService.get<string>('crypto.iv', { infer: true }),
-    'hex',
-  );
-  constructor(private readonly configService: ConfigService<AllConfigType>) {}
+  constructor(private keyService: KeysService) {}
 
-  async encrypt(str: string): Promise<string> {
-    let cipher = createCipheriv(this.algorithm, this.key, this.iv);
-    let encrypted = cipher.update(str, 'utf8', 'hex');
-    encrypted += cipher.final('hex');
-    return encrypted;
+  setKeys(privateKeyPath: string, publicKeyPath: string): void {
+    this.keyService.setPrivateKeyPath(privateKeyPath);
+    this.keyService.setPublicKeyPath(publicKeyPath);
   }
 
-  async decrypt(encryptedStr: string): Promise<string> {
-    let decipher = createDecipheriv(this.algorithm, this.key, this.iv);
-    let decrypted = decipher.update(encryptedStr, 'hex', 'utf8');
-    decrypted += decipher.final('utf8');
-    return decrypted;
+  async encryptWithPublicKey(str: string): Promise<string> {
+    const buffer = Buffer.from(str, 'utf8');
+    const encrypted = publicEncrypt(this.keyService.getPublicKey(), buffer);
+    return encrypted.toString('base64');
+  }
+
+  async encryptWithPrivateKey(str: string): Promise<string> {
+    const buffer = Buffer.from(str, 'utf8');
+    const encrypted = privateEncrypt(this.keyService.getPrivateKey(), buffer);
+    return encrypted.toString('base64');
+  }
+
+  async decryptWithPublicKey(encryptedStr: string): Promise<string> {
+    const buffer = Buffer.from(encryptedStr, 'base64');
+    const decrypted = publicDecrypt(this.keyService.getPublicKey(), buffer);
+    return decrypted.toString('utf8');
+  }
+
+  async decryptWithPrivateKey(encryptedStr: string): Promise<string> {
+    const buffer = Buffer.from(encryptedStr, 'base64');
+    const decrypted = privateDecrypt(this.keyService.getPrivateKey(), buffer);
+    return decrypted.toString('utf8');
   }
 }
