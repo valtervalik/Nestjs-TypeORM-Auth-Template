@@ -34,7 +34,7 @@ import redisConfig from './redis/config/redis.config';
     AuthModule,
     EMailerModule,
     TypedEventEmitterModule,
-    GoogleAuthModule,
+    ...(process.env.GOOGLE_CLIENT_ID ? [GoogleAuthModule] : []),
   ],
 })
 export class AppModule {}
