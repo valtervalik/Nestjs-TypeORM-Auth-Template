@@ -12,6 +12,7 @@ import {
 import { Request, Response } from 'express';
 import { toFileStream } from 'qrcode';
 import { TypedEventEmitter } from 'src/common/types/typed-event-emitter/typed-event-emitter.class';
+import { User } from 'src/users/entities/user.entity';
 import { ActiveUser } from '../decorators/active-user.decorator';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import { AuthenticationService } from './authentication.service';
@@ -44,9 +45,12 @@ export class AuthenticationController {
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('sign-in')
-  async signIn(@Req() request, @Res({ passthrough: true }) response: Response) {
+  async signIn(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
     return await this.authenticationService.generateTokens(
-      request.user,
+      request.user as User,
       response,
     );
   }
