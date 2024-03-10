@@ -8,6 +8,9 @@ class EnvironmentVariablesValidator {
   JWT_SECRET: string;
 
   @IsString()
+  JWT_REFRESH_TOKEN_SECRET: string;
+
+  @IsString()
   JWT_TOKEN_AUDIENCE: string;
 
   @IsString()
@@ -27,6 +30,7 @@ export default registerAs<AuthConfig>('auth', () => {
 
   return {
     secret: process.env.JWT_SECRET,
+    refreshTokenSecret: process.env.JWT_REFRESH_TOKEN_SECRET,
     audience: process.env.JWT_TOKEN_AUDIENCE,
     issuer: process.env.JWT_TOKEN_ISSUER,
     accessTokenTTL: parseInt(process.env.JWT_ACCESS_TOKEN_TTL, 10),
