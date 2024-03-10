@@ -1,5 +1,5 @@
 import { registerAs } from '@nestjs/config';
-import { IsNumber, IsString, Min } from 'class-validator';
+import { IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import validateConfig from '../../utils/validate-config';
 import { RedisConfig } from './redis-config.type';
 
@@ -7,8 +7,10 @@ class EnvironmentVariablesValidator {
   @IsString()
   REDIS_HOST: string;
 
-  @IsNumber()
+  @IsInt()
   @Min(0)
+  @Max(65535)
+  @IsOptional()
   REDIS_PORT: number;
 }
 
@@ -17,6 +19,6 @@ export default registerAs<RedisConfig>('redis', () => {
 
   return {
     host: process.env.REDIS_HOST,
-    port: parseInt(process.env.REDIS_PORT, 10),
+    port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379,
   };
 });
