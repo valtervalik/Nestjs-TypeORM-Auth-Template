@@ -192,7 +192,7 @@ export function BaseService<T>(
       }
     }
 
-    public async findById(id: number): Promise<T> {
+    public async findById(id: string): Promise<T> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -265,7 +265,7 @@ export function BaseService<T>(
     }
 
     public async update(
-      id: number,
+      id: string,
       updateDto: Params,
       options: CustomUpdateOptions,
       activeUser?: ActiveUserData,
@@ -292,7 +292,7 @@ export function BaseService<T>(
     }
 
     public async updateMany(
-      ids: number[],
+      ids: string[],
       conditions: Params,
       options: CustomUpdateOptions,
       activeUser?: ActiveUserData,
@@ -318,7 +318,7 @@ export function BaseService<T>(
       }
     }
 
-    public async remove(id: number, activeUser?: ActiveUserData): Promise<any> {
+    public async remove(id: string, activeUser?: ActiveUserData): Promise<any> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -350,7 +350,7 @@ export function BaseService<T>(
     }
 
     public async removeMany(
-      ids: number[],
+      ids: string[],
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
@@ -384,7 +384,7 @@ export function BaseService<T>(
     }
 
     public async restore(
-      id: number,
+      id: string,
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
@@ -410,7 +410,7 @@ export function BaseService<T>(
     }
 
     public async restoreMany(
-      ids: number[],
+      ids: string[],
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
