@@ -7,6 +7,7 @@ import { BaseService } from 'src/base/base.service';
 import { HashingService } from 'src/common/hashing/hashing.service';
 import { AllConfigType } from 'src/config/config.type';
 import { User } from 'src/users/entities/user.entity';
+import { REFRESH_TOKEN_KEY } from '../auth.constants';
 import { ActiveUserData } from '../interfaces/active-user-data.interface';
 import {
   InvalidateRefreshTokenError,
@@ -66,7 +67,7 @@ export class AuthenticationService extends BaseService<User>(User) {
   }
 
   private async signAccessToken<T>(
-    userId: number,
+    userId: string,
     expiresIn: number,
     payload?: T,
   ) {
@@ -85,7 +86,7 @@ export class AuthenticationService extends BaseService<User>(User) {
   }
 
   private async signRefreshToken<T>(
-    userId: number,
+    userId: string,
     expiresIn: number,
     payload?: T,
   ) {
@@ -123,9 +124,9 @@ export class AuthenticationService extends BaseService<User>(User) {
     ]);
     await this.refreshTokenIdsStorage.insert(user.id, refreshTokenId);
 
-    response.cookie('refresh_token', refreshToken, {
+    response.cookie(REFRESH_TOKEN_KEY, refreshToken, {
       httpOnly: true,
-      path: '/auth/refresh',
+      path: '/',
       maxAge:
         this.configService.get('auth.refreshTokenTTL', { infer: true }) * 1000,
       secure: true,
