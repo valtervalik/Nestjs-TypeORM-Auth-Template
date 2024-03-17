@@ -3,7 +3,6 @@ import { Permission } from 'src/permissions/entities/permission.entity';
 import {
   Column,
   Entity,
-  Generated,
   JoinColumn,
   JoinTable,
   ManyToOne,
@@ -13,10 +12,6 @@ import { Role } from '../../roles/entities/role.entity';
 
 @Entity()
 export class User extends Base {
-  @Generated('uuid')
-  @Column()
-  uuid: string;
-
   @Column({ unique: true })
   email: string;
 
