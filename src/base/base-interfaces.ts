@@ -74,3 +74,8 @@ export interface Params {
 }
 
 export const DEFAULT_PAGINATION: Pagination = { page: 1, limit: 10 };
+
+export enum OrderDirections {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
