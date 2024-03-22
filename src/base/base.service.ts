@@ -13,6 +13,7 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import {
   CustomUpdateOptions,
   IBaseService,
+  OrderDirections,
   Pagination,
   PaginationResult,
   Params,
@@ -103,11 +104,14 @@ export function BaseService<T>(
         const { page = 1, limit = 10 } = pagination;
         const skipCount = (page - 1) * limit;
         const order = conditions['order'] || 'created_at';
+        const orderDirection =
+          conditions['orderDirection'] || OrderDirections.ASC;
         const select = conditions['select'] || [];
         const relations = conditions['relations'] || [];
 
         const where: Params = { ...conditions };
         delete where.order;
+        delete where.orderDirection;
         delete where.relations;
         delete where.select;
 
@@ -123,11 +127,23 @@ export function BaseService<T>(
           .where(where)
           .skip(skipCount)
           .take(limit)
-          .orderBy(`entity.${order}`);
+          .orderBy(`entity.${order}`, orderDirection);
 
         if (relations.length > 0) {
-          relations.forEach((relation) => {
-            queryBuilder.leftJoinAndSelect(`entity.${relation}`, relation);
+          relations.forEach((relation: string) => {
+            const nestedRelations = relation.split('.');
+            if (nestedRelations.length > 1) {
+              queryBuilder.leftJoinAndSelect(
+                `entity.${nestedRelations[0]}`,
+                nestedRelations[0],
+              );
+              queryBuilder.leftJoinAndSelect(
+                `${nestedRelations[0]}.${nestedRelations[1]}`,
+                nestedRelations[1],
+              );
+            } else {
+              queryBuilder.leftJoinAndSelect(`entity.${relation}`, relation);
+            }
           });
         }
 
@@ -157,11 +173,14 @@ export function BaseService<T>(
     ): Promise<{ elements: T[]; total: number }> {
       try {
         const order = conditions['order'] || 'created_at';
+        const orderDirection =
+          conditions['orderDirection'] || OrderDirections.ASC;
         const select = conditions['select'] || [];
         const relations = conditions['relations'] || [];
 
         const where: Params = { ...conditions };
         delete where.order;
+        delete where.orderDirection;
         delete where.relations;
         delete where.select;
 
@@ -175,11 +194,23 @@ export function BaseService<T>(
         queryBuilder
           .select(select.length > 0 ? select : null)
           .where(where)
-          .orderBy(`entity.${order}`);
+          .orderBy(`entity.${order}`, orderDirection);
 
         if (relations.length > 0) {
-          relations.forEach((relation) => {
-            queryBuilder.leftJoinAndSelect(`entity.${relation}`, relation);
+          relations.forEach((relation: string) => {
+            const nestedRelations = relation.split('.');
+            if (nestedRelations.length > 1) {
+              queryBuilder.leftJoinAndSelect(
+                `entity.${nestedRelations[0]}`,
+                nestedRelations[0],
+              );
+              queryBuilder.leftJoinAndSelect(
+                `${nestedRelations[0]}.${nestedRelations[1]}`,
+                nestedRelations[1],
+              );
+            } else {
+              queryBuilder.leftJoinAndSelect(`entity.${relation}`, relation);
+            }
           });
         }
 
@@ -229,8 +260,20 @@ export function BaseService<T>(
           .where(where);
 
         if (relations.length > 0) {
-          relations.forEach((relation) => {
-            queryBuilder.leftJoinAndSelect(`entity.${relation}`, relation);
+          relations.forEach((relation: string) => {
+            const nestedRelations = relation.split('.');
+            if (nestedRelations.length > 1) {
+              queryBuilder.leftJoinAndSelect(
+                `entity.${nestedRelations[0]}`,
+                nestedRelations[0],
+              );
+              queryBuilder.leftJoinAndSelect(
+                `${nestedRelations[0]}.${nestedRelations[1]}`,
+                nestedRelations[1],
+              );
+            } else {
+              queryBuilder.leftJoinAndSelect(`entity.${relation}`, relation);
+            }
           });
         }
 
