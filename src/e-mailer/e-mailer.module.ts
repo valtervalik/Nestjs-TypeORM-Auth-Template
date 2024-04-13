@@ -21,7 +21,7 @@ import { EMailerService } from './e-mailer.service';
         defaults: {
           from: `"${configService.getOrThrow('emailer.username', {
             infer: true,
-          })}" <${configService.getOrThrow('emailer.user', { infer: true })}}>`,
+          })}" <${configService.getOrThrow('emailer.user', { infer: true })}>`,
         },
         template: {
           dir: join(__dirname, '/templates'),
