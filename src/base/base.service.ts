@@ -19,16 +19,9 @@ import {
   Params,
 } from './base-interfaces';
 
-type BaseServiceOptions = {
-  softDelete?: boolean;
-};
-
 export function BaseService<T>(
   entityClass: EntityClassOrSchema,
-  options: BaseServiceOptions = {},
 ): Type<IBaseService<T>> {
-  const { softDelete = true } = options;
-
   @Injectable()
   class BaseServiceClass<T> implements IBaseService<T> {
     @InjectRepository(entityClass)
@@ -108,12 +101,14 @@ export function BaseService<T>(
           conditions['orderDirection'] || OrderDirections.ASC;
         const select = conditions['select'] || [];
         const relations = conditions['relations'] || [];
+        const smartSearch = conditions['smartSearch'] || false;
 
         const where: Params = { ...conditions };
         delete where.order;
         delete where.orderDirection;
         delete where.relations;
         delete where.select;
+        delete where.smartSearch;
 
         const queryBuilder =
           this.genericRepository.createQueryBuilder('entity');
@@ -122,9 +117,36 @@ export function BaseService<T>(
           delete where.deleted;
         }
 
+        if (smartSearch) {
+          Object.keys(where).forEach((key: string) => {
+            const value = where[key];
+            const [relation, property] = key.split('.');
+            if (property) {
+              queryBuilder.orWhere(`${relation}.${property} ILIKE :value`, {
+                value: `%${value}%`,
+              });
+            } else {
+              queryBuilder.orWhere(`entity.${key} ILIKE :value`, {
+                value: `%${value}%`,
+              });
+            }
+          });
+        } else {
+          Object.keys(where).forEach((key: string) => {
+            const value = where[key];
+            const [relation, property] = key.split('.');
+            if (property) {
+              queryBuilder.andWhere(`${relation}.${property} = :value`, {
+                value,
+              });
+            } else {
+              queryBuilder.andWhere(`entity.${key} = :value`, { value });
+            }
+          });
+        }
+
         queryBuilder
           .select(select.length > 0 ? select : null)
-          .where(where)
           .skip(skipCount)
           .take(limit)
           .orderBy(`entity.${order}`, orderDirection);
@@ -170,6 +192,7 @@ export function BaseService<T>(
 
     public async findAllWithoutPagination(
       conditions: Params = {},
+      smartSearch: boolean = false,
     ): Promise<{ elements: T[]; total: number }> {
       try {
         const order = conditions['order'] || 'created_at';
@@ -177,12 +200,14 @@ export function BaseService<T>(
           conditions['orderDirection'] || OrderDirections.ASC;
         const select = conditions['select'] || [];
         const relations = conditions['relations'] || [];
+        const smartSearch = conditions['smartSearch'] || false;
 
         const where: Params = { ...conditions };
         delete where.order;
         delete where.orderDirection;
         delete where.relations;
         delete where.select;
+        delete where.smartSearch;
 
         const queryBuilder =
           this.genericRepository.createQueryBuilder('entity');
@@ -191,9 +216,36 @@ export function BaseService<T>(
           delete where.deleted;
         }
 
+        if (smartSearch) {
+          Object.keys(where).forEach((key: string) => {
+            const value = where[key];
+            const [relation, property] = key.split('.');
+            if (property) {
+              queryBuilder.orWhere(`${relation}.${property} ILIKE :value`, {
+                value: `%${value}%`,
+              });
+            } else {
+              queryBuilder.orWhere(`entity.${key} ILIKE :value`, {
+                value: `%${value}%`,
+              });
+            }
+          });
+        } else {
+          Object.keys(where).forEach((key: string) => {
+            const value = where[key];
+            const [relation, property] = key.split('.');
+            if (property) {
+              queryBuilder.andWhere(`${relation}.${property} = :value`, {
+                value,
+              });
+            } else {
+              queryBuilder.andWhere(`entity.${key} = :value`, { value });
+            }
+          });
+        }
+
         queryBuilder
           .select(select.length > 0 ? select : null)
-          .where(where)
           .orderBy(`entity.${order}`, orderDirection);
 
         if (relations.length > 0) {
@@ -230,13 +282,13 @@ export function BaseService<T>(
         const data = await queryBuilder.where({ id }).getOne();
 
         if (!data)
-          throw new BadRequestException(
+          throw new NotFoundException(
             `Not found ${this.genericRepository.metadata.name} with id ${id}`,
           );
 
         return data;
       } catch (err) {
-        throw new ConflictException(err.message);
+        throw err;
       }
     }
 
@@ -256,7 +308,9 @@ export function BaseService<T>(
         }
 
         queryBuilder
-          .select(select.length > 0 ? select.map((s) => `entity.${s}`) : null)
+          .select(
+            select.length > 0 ? select.map((s: string) => `entity.${s}`) : null,
+          )
           .where(where);
 
         if (relations.length > 0) {
@@ -289,7 +343,7 @@ export function BaseService<T>(
 
         return response;
       } catch (err) {
-        throw new ConflictException(err.message);
+        throw err;
       }
     }
 
@@ -310,7 +364,7 @@ export function BaseService<T>(
     public async update(
       id: string,
       updateDto: Params,
-      options: CustomUpdateOptions,
+      opt: CustomUpdateOptions,
       activeUser?: ActiveUserData,
     ): Promise<T | any> {
       try {
@@ -326,7 +380,7 @@ export function BaseService<T>(
           .where('id = :id', { id })
           .execute();
 
-        if (options.new) {
+        if (opt.new) {
           return await queryBuilder.where('id = :id', { id }).getOne();
         }
       } catch (err) {
@@ -337,7 +391,7 @@ export function BaseService<T>(
     public async updateMany(
       ids: string[],
       conditions: Params,
-      options: CustomUpdateOptions,
+      opt: CustomUpdateOptions,
       activeUser?: ActiveUserData,
     ): Promise<T[] | any> {
       try {
@@ -353,7 +407,7 @@ export function BaseService<T>(
           .whereInIds(ids)
           .execute();
 
-        if (options.new) {
+        if (opt.new) {
           return await queryBuilder.whereInIds(ids).getMany();
         }
       } catch (err) {
@@ -361,29 +415,51 @@ export function BaseService<T>(
       }
     }
 
-    public async remove(id: string, activeUser?: ActiveUserData): Promise<any> {
+    public async remove(id: string): Promise<any> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
-        if (softDelete) {
-          await queryBuilder.softDelete().where('id = :id', { id }).execute();
+        await queryBuilder
+          .delete()
+          .from(this.genericRepository.metadata.name)
+          .where('id = :id', { id })
+          .execute();
+      } catch (err) {
+        throw new ConflictException(err.message);
+      }
+    }
+
+    public async removeMany(ids: string[]): Promise<any> {
+      try {
+        const queryBuilder = this.genericRepository.createQueryBuilder();
+
+        await queryBuilder
+          .delete()
+          .from(this.genericRepository.metadata.name)
+          .whereInIds(ids)
+          .execute();
+      } catch (err) {
+        throw new ConflictException(err.message);
+      }
+    }
+
+    public async softRemove(
+      id: string,
+      activeUser?: ActiveUserData,
+    ): Promise<any> {
+      try {
+        const queryBuilder = this.genericRepository.createQueryBuilder();
+        await queryBuilder.softDelete().where('id = :id', { id }).execute();
+        await queryBuilder
+          .update()
+          .set({ restored_by: null, restored_at: null } as any)
+          .where('id = :id', { id })
+          .execute();
+
+        if (activeUser) {
           await queryBuilder
             .update()
-            .set({ restored_by: null, restored_at: null } as any)
-            .where('id = :id', { id })
-            .execute();
-
-          if (activeUser) {
-            await queryBuilder
-              .update()
-              .set({ deleted_by: activeUser.sub } as any)
-              .where('id = :id', { id })
-              .execute();
-          }
-        } else {
-          await queryBuilder
-            .delete()
-            .from(this.genericRepository.metadata.name)
+            .set({ deleted_by: activeUser.sub } as any)
             .where('id = :id', { id })
             .execute();
         }
@@ -391,38 +467,25 @@ export function BaseService<T>(
         throw new ConflictException(err.message);
       }
     }
-
-    public async removeMany(
+    public async softRemoveMany(
       ids: string[],
       activeUser?: ActiveUserData,
     ): Promise<any> {
-      try {
-        const queryBuilder = this.genericRepository.createQueryBuilder();
+      const queryBuilder = this.genericRepository.createQueryBuilder();
 
-        if (softDelete) {
-          await queryBuilder.softDelete().whereInIds(ids).execute();
-          await queryBuilder
-            .update()
-            .set({ restored_by: null, restored_at: null } as any)
-            .whereInIds(ids)
-            .execute();
+      await queryBuilder.softDelete().whereInIds(ids).execute();
+      await queryBuilder
+        .update()
+        .set({ restored_by: null, restored_at: null } as any)
+        .whereInIds(ids)
+        .execute();
 
-          if (activeUser) {
-            await queryBuilder
-              .update()
-              .set({ deleted_by: activeUser.sub } as any)
-              .whereInIds(ids)
-              .execute();
-          }
-        } else {
-          await queryBuilder
-            .delete()
-            .from(this.genericRepository.metadata.name)
-            .whereInIds(ids)
-            .execute();
-        }
-      } catch (err) {
-        throw new ConflictException(err.message);
+      if (activeUser) {
+        await queryBuilder
+          .update()
+          .set({ deleted_by: activeUser.sub } as any)
+          .whereInIds(ids)
+          .execute();
       }
     }
 

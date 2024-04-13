@@ -30,20 +30,24 @@ export interface IBaseService<M> {
   update(
     id: string,
     updateDto: Params,
-    options: CustomUpdateOptions,
+    opt: CustomUpdateOptions,
     activeUser?: ActiveUserData,
   ): Promise<M>;
 
   updateMany(
     ids: string[],
     conditions: Params,
-    options: CustomUpdateOptions,
+    opt: CustomUpdateOptions,
     activeUser?: ActiveUserData,
   ): Promise<any>;
 
-  remove(id: string, activeUser?: ActiveUserData): Promise<any>;
+  remove(id: string): Promise<any>;
 
-  removeMany(ids: string[], activeUser?: ActiveUserData): Promise<any>;
+  removeMany(ids: string[]): Promise<any>;
+
+  softRemove(id: string, activeUser?: ActiveUserData): Promise<any>;
+
+  softRemoveMany(ids: string[], activeUser?: ActiveUserData): Promise<any>;
 
   restore(id: string, activeUser?: ActiveUserData): Promise<any>;
 
