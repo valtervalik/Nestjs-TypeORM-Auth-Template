@@ -64,11 +64,8 @@ export class UsersController {
   }
 
   @Delete(':id')
-  async remove(
-    @Param('id') id: string,
-    @ActiveUser() activeUser: ActiveUserData,
-  ) {
-    await this.usersService.remove(id, activeUser);
+  async remove(@Param('id') id: string) {
+    await this.usersService.remove(id);
 
     return apiResponseHandler('User deleted successfully', 200);
   }
