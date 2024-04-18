@@ -41,7 +41,11 @@ export class AuthenticationController {
       email: signUpDto.email,
     });
 
-    return apiResponseHandler('User registered successfully', 201, user);
+    return apiResponseHandler(
+      'User registered successfully',
+      HttpStatus.CREATED,
+      user,
+    );
   }
 
   @UseGuards(LocalAuthGuard)
@@ -56,7 +60,7 @@ export class AuthenticationController {
       response,
     );
 
-    return apiResponseHandler('Login successful', 200, accessToken);
+    return apiResponseHandler('Login successful', HttpStatus.OK, accessToken);
   }
 
   @HttpCode(HttpStatus.OK)
@@ -93,13 +97,13 @@ export class AuthenticationController {
 
     return apiResponseHandler(
       'Two-factor authentication disabled successfully',
-      200,
+      HttpStatus.OK,
     );
   }
 
   @Get('logout')
   logout(@Res({ passthrough: true }) response: Response) {
     response.clearCookie(REFRESH_TOKEN_KEY);
-    return apiResponseHandler('Logout successful', 200);
+    return apiResponseHandler('Logout successful', HttpStatus.OK);
   }
 }
