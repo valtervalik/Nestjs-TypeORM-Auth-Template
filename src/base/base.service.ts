@@ -192,7 +192,6 @@ export function BaseService<T>(
 
     public async findAllWithoutPagination(
       conditions: Params = {},
-      smartSearch: boolean = false,
     ): Promise<{ elements: T[]; total: number }> {
       try {
         const order = conditions['order'] || 'created_at';
