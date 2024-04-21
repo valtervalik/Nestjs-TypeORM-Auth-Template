@@ -48,11 +48,11 @@ export function BaseService<T>(
           .execute();
 
         return saved.generatedMaps[0] as T;
-      } catch (e) {
-        if (e.code === '23505') {
+      } catch (err) {
+        if (err.code === '23505') {
           throw new ConflictException('Document already exists');
         }
-        throw e;
+        throw err;
       }
     }
 
@@ -470,21 +470,25 @@ export function BaseService<T>(
       ids: string[],
       activeUser?: ActiveUserData,
     ): Promise<any> {
-      const queryBuilder = this.genericRepository.createQueryBuilder();
+      try {
+        const queryBuilder = this.genericRepository.createQueryBuilder();
 
-      await queryBuilder.softDelete().whereInIds(ids).execute();
-      await queryBuilder
-        .update()
-        .set({ restored_by: null, restored_at: null } as any)
-        .whereInIds(ids)
-        .execute();
-
-      if (activeUser) {
+        await queryBuilder.softDelete().whereInIds(ids).execute();
         await queryBuilder
           .update()
-          .set({ deleted_by: activeUser.sub } as any)
+          .set({ restored_by: null, restored_at: null } as any)
           .whereInIds(ids)
           .execute();
+
+        if (activeUser) {
+          await queryBuilder
+            .update()
+            .set({ deleted_by: activeUser.sub } as any)
+            .whereInIds(ids)
+            .execute();
+        }
+      } catch (err) {
+        throw new ConflictException(err.message);
       }
     }
 
