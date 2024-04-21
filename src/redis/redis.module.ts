@@ -11,6 +11,9 @@ export class RedisModule {
     return new Redis({
       host: this.configService.getOrThrow('redis.host', { infer: true }),
       port: this.configService.getOrThrow('redis.port', { infer: true }),
+      password: this.configService.getOrThrow('redis.password', {
+        infer: true,
+      }),
     });
   }
 }

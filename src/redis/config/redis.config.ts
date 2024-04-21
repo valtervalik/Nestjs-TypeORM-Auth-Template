@@ -12,6 +12,9 @@ class EnvironmentVariablesValidator {
   @Max(65535)
   @IsOptional()
   REDIS_PORT: number;
+
+  @IsString()
+  REDIS_PASSWORD: string;
 }
 
 export default registerAs<RedisConfig>('redis', () => {
@@ -20,5 +23,6 @@ export default registerAs<RedisConfig>('redis', () => {
   return {
     host: process.env.REDIS_HOST,
     port: process.env.REDIS_PORT ? parseInt(process.env.REDIS_PORT, 10) : 6379,
+    password: process.env.REDIS_PASSWORD,
   };
 });
