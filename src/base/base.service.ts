@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
   Type,
 } from '@nestjs/common';
@@ -24,6 +25,7 @@ export function BaseService<T>(
 ): Type<IBaseService<T>> {
   @Injectable()
   class BaseServiceClass<T> implements IBaseService<T> {
+    private readonly logger = new Logger(BaseServiceClass.name);
     @InjectRepository(entityClass)
     public readonly genericRepository: Repository<T>;
 
@@ -50,8 +52,10 @@ export function BaseService<T>(
         return saved.generatedMaps[0] as T;
       } catch (err) {
         if (err.code === '23505') {
+          this.logger.error(err);
           throw new ConflictException('Document already exists');
         }
+        this.logger.error(err);
         throw err;
       }
     }
@@ -85,6 +89,7 @@ export function BaseService<T>(
 
         return saved.generatedMaps[0] as T;
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
@@ -92,6 +97,7 @@ export function BaseService<T>(
     public async findAll(
       conditions: Params = {},
       pagination: Pagination = { page: 1, limit: 10 },
+      smartSearch?: Params,
     ): Promise<{ elements: T[]; pagination: PaginationResult }> {
       try {
         const { page = 1, limit = 10 } = pagination;
@@ -101,14 +107,14 @@ export function BaseService<T>(
           conditions['orderDirection'] || OrderDirections.ASC;
         const select = conditions['select'] || [];
         const relations = conditions['relations'] || [];
-        const smartSearch = conditions['smartSearch'] || false;
+        const innerJoin = conditions['innerJoin'] || [];
 
         const where: Params = { ...conditions };
         delete where.order;
         delete where.orderDirection;
         delete where.relations;
         delete where.select;
-        delete where.smartSearch;
+        delete where.innerJoin;
 
         const queryBuilder =
           this.genericRepository.createQueryBuilder('entity');
@@ -118,17 +124,23 @@ export function BaseService<T>(
         }
 
         if (smartSearch) {
-          Object.keys(where).forEach((key: string) => {
-            const value = where[key];
+          Object.keys(smartSearch).forEach((key: string) => {
+            const value = smartSearch[key];
             const [relation, property] = key.split('.');
             if (property) {
-              queryBuilder.orWhere(`${relation}.${property} ILIKE :value`, {
-                value: `%${value}%`,
-              });
+              queryBuilder.orWhere(
+                `CAST(${relation}.${property} AS TEXT)  ILIKE :value`,
+                {
+                  value: `%${value}%`,
+                },
+              );
             } else {
-              queryBuilder.orWhere(`entity.${key} ILIKE :value`, {
-                value: `%${value}%`,
-              });
+              queryBuilder.orWhere(
+                `CAST(entity.${key} AS TEXT)  ILIKE :value`,
+                {
+                  value: `%${value}%`,
+                },
+              );
             }
           });
         } else {
@@ -136,17 +148,16 @@ export function BaseService<T>(
             const value = where[key];
             const [relation, property] = key.split('.');
             if (property) {
-              queryBuilder.andWhere(`${relation}.${property} = :value`, {
-                value,
-              });
+              where[`${relation}.${property}`] = value;
             } else {
-              queryBuilder.andWhere(`entity.${key} = :value`, { value });
+              where[`${key}`] = value;
             }
           });
         }
 
         queryBuilder
           .select(select.length > 0 ? select : null)
+          .andWhere(where)
           .skip(skipCount)
           .take(limit)
           .orderBy(`entity.${order}`, orderDirection);
@@ -169,6 +180,12 @@ export function BaseService<T>(
           });
         }
 
+        if (innerJoin.length > 0) {
+          innerJoin.forEach((join: string) => {
+            queryBuilder.innerJoinAndSelect(`entity.${join}`, join);
+          });
+        }
+
         const [elements, totalElements] = await queryBuilder.getManyAndCount();
 
         const hasNextPage = totalElements > page * limit;
@@ -186,12 +203,14 @@ export function BaseService<T>(
 
         return { elements, pagination: paginationResult };
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
 
     public async findAllWithoutPagination(
       conditions: Params = {},
+      smartSearch?: Params,
     ): Promise<{ elements: T[]; total: number }> {
       try {
         const order = conditions['order'] || 'created_at';
@@ -199,14 +218,14 @@ export function BaseService<T>(
           conditions['orderDirection'] || OrderDirections.ASC;
         const select = conditions['select'] || [];
         const relations = conditions['relations'] || [];
-        const smartSearch = conditions['smartSearch'] || false;
+        const innerJoin = conditions['innerJoin'] || [];
 
         const where: Params = { ...conditions };
         delete where.order;
         delete where.orderDirection;
         delete where.relations;
         delete where.select;
-        delete where.smartSearch;
+        delete where.innerJoin;
 
         const queryBuilder =
           this.genericRepository.createQueryBuilder('entity');
@@ -216,15 +235,18 @@ export function BaseService<T>(
         }
 
         if (smartSearch) {
-          Object.keys(where).forEach((key: string) => {
-            const value = where[key];
+          Object.keys(smartSearch).forEach((key: string) => {
+            const value = smartSearch[key];
             const [relation, property] = key.split('.');
             if (property) {
-              queryBuilder.orWhere(`${relation}.${property} ILIKE :value`, {
-                value: `%${value}%`,
-              });
+              queryBuilder.orWhere(
+                `CAST(${relation}.${property} AS TEXT) ILIKE :value`,
+                {
+                  value: `%${value}%`,
+                },
+              );
             } else {
-              queryBuilder.orWhere(`entity.${key} ILIKE :value`, {
+              queryBuilder.orWhere(`CAST(entity.${key} AS TEXT) ILIKE :value`, {
                 value: `%${value}%`,
               });
             }
@@ -234,17 +256,16 @@ export function BaseService<T>(
             const value = where[key];
             const [relation, property] = key.split('.');
             if (property) {
-              queryBuilder.andWhere(`${relation}.${property} = :value`, {
-                value,
-              });
+              where[`${relation}.${property}`] = value;
             } else {
-              queryBuilder.andWhere(`entity.${key} = :value`, { value });
+              where[`${key}`] = value;
             }
           });
         }
 
         queryBuilder
           .select(select.length > 0 ? select : null)
+          .andWhere(where)
           .orderBy(`entity.${order}`, orderDirection);
 
         if (relations.length > 0) {
@@ -265,16 +286,23 @@ export function BaseService<T>(
           });
         }
 
+        if (innerJoin.length > 0) {
+          innerJoin.forEach((join: string) => {
+            queryBuilder.innerJoinAndSelect(`entity.${join}`, join);
+          });
+        }
+
         const elements = await queryBuilder.getMany();
         const total = await queryBuilder.getCount();
 
         return { elements, total };
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
 
-    public async findById(id: string): Promise<T> {
+    public async findById(id: number): Promise<T> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -287,6 +315,7 @@ export function BaseService<T>(
 
         return data;
       } catch (err) {
+        this.logger.error(err);
         throw err;
       }
     }
@@ -342,6 +371,7 @@ export function BaseService<T>(
 
         return response;
       } catch (err) {
+        this.logger.error(err);
         throw err;
       }
     }
@@ -356,12 +386,13 @@ export function BaseService<T>(
 
         return count > 0;
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
 
     public async update(
-      id: string,
+      id: number,
       updateDto: Params,
       opt: CustomUpdateOptions,
       activeUser?: ActiveUserData,
@@ -383,12 +414,13 @@ export function BaseService<T>(
           return await queryBuilder.where('id = :id', { id }).getOne();
         }
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
 
     public async updateMany(
-      ids: string[],
+      ids: number[],
       conditions: Params,
       opt: CustomUpdateOptions,
       activeUser?: ActiveUserData,
@@ -410,11 +442,12 @@ export function BaseService<T>(
           return await queryBuilder.whereInIds(ids).getMany();
         }
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
 
-    public async remove(id: string): Promise<any> {
+    public async remove(id: number): Promise<any> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -424,11 +457,12 @@ export function BaseService<T>(
           .where('id = :id', { id })
           .execute();
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
 
-    public async removeMany(ids: string[]): Promise<any> {
+    public async removeMany(ids: number[]): Promise<any> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -438,12 +472,13 @@ export function BaseService<T>(
           .whereInIds(ids)
           .execute();
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
 
     public async softRemove(
-      id: string,
+      id: number,
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
@@ -463,11 +498,12 @@ export function BaseService<T>(
             .execute();
         }
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
     public async softRemoveMany(
-      ids: string[],
+      ids: number[],
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
@@ -488,12 +524,13 @@ export function BaseService<T>(
             .execute();
         }
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
 
     public async restore(
-      id: string,
+      id: number,
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
@@ -514,12 +551,13 @@ export function BaseService<T>(
             .execute();
         }
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
 
     public async restoreMany(
-      ids: string[],
+      ids: number[],
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
@@ -540,6 +578,7 @@ export function BaseService<T>(
             .execute();
         }
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }
@@ -554,6 +593,7 @@ export function BaseService<T>(
 
         return count;
       } catch (err) {
+        this.logger.error(err);
         throw new ConflictException(err.message);
       }
     }

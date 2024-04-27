@@ -15,43 +15,45 @@ export interface IBaseService<M> {
   findAll(
     conditions: Params,
     pagination: Pagination,
+    smartSearch?: Params,
   ): Promise<{ elements: M[]; pagination: PaginationResult }>;
 
   findAllWithoutPagination(
     conditions: Params,
+    smartSearch?: Params,
   ): Promise<{ elements: M[]; total: number }>;
 
-  findById(id: string): Promise<M>;
+  findById(id: number): Promise<M>;
 
   findOne(conditions: Params): Promise<M>;
 
   exists(conditions: Params): Promise<boolean>;
 
   update(
-    id: string,
+    id: number,
     updateDto: Params,
     opt: CustomUpdateOptions,
     activeUser?: ActiveUserData,
   ): Promise<M>;
 
   updateMany(
-    ids: string[],
+    ids: number[],
     conditions: Params,
     opt: CustomUpdateOptions,
     activeUser?: ActiveUserData,
   ): Promise<any>;
 
-  remove(id: string): Promise<any>;
+  remove(id: number): Promise<any>;
 
-  removeMany(ids: string[]): Promise<any>;
+  removeMany(ids: number[]): Promise<any>;
 
-  softRemove(id: string, activeUser?: ActiveUserData): Promise<any>;
+  softRemove(id: number, activeUser?: ActiveUserData): Promise<any>;
 
-  softRemoveMany(ids: string[], activeUser?: ActiveUserData): Promise<any>;
+  softRemoveMany(ids: number[], activeUser?: ActiveUserData): Promise<any>;
 
-  restore(id: string, activeUser?: ActiveUserData): Promise<any>;
+  restore(id: number, activeUser?: ActiveUserData): Promise<any>;
 
-  restoreMany(ids: string[], activeUser?: ActiveUserData): Promise<any>;
+  restoreMany(ids: number[], activeUser?: ActiveUserData): Promise<any>;
 
   count(conditions?: Params): Promise<number>;
 }
