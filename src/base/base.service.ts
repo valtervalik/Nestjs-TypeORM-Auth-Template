@@ -107,14 +107,12 @@ export function BaseService<T>(
           conditions['orderDirection'] || OrderDirections.ASC;
         const select = conditions['select'] || [];
         const relations = conditions['relations'] || [];
-        const innerJoin = conditions['innerJoin'] || [];
 
         const where: Params = { ...conditions };
         delete where.order;
         delete where.orderDirection;
         delete where.relations;
         delete where.select;
-        delete where.innerJoin;
 
         const queryBuilder =
           this.genericRepository.createQueryBuilder('entity');
@@ -180,12 +178,6 @@ export function BaseService<T>(
           });
         }
 
-        if (innerJoin.length > 0) {
-          innerJoin.forEach((join: string) => {
-            queryBuilder.innerJoinAndSelect(`entity.${join}`, join);
-          });
-        }
-
         const [elements, totalElements] = await queryBuilder.getManyAndCount();
 
         const hasNextPage = totalElements > page * limit;
@@ -218,14 +210,12 @@ export function BaseService<T>(
           conditions['orderDirection'] || OrderDirections.ASC;
         const select = conditions['select'] || [];
         const relations = conditions['relations'] || [];
-        const innerJoin = conditions['innerJoin'] || [];
 
         const where: Params = { ...conditions };
         delete where.order;
         delete where.orderDirection;
         delete where.relations;
         delete where.select;
-        delete where.innerJoin;
 
         const queryBuilder =
           this.genericRepository.createQueryBuilder('entity');
@@ -286,12 +276,6 @@ export function BaseService<T>(
           });
         }
 
-        if (innerJoin.length > 0) {
-          innerJoin.forEach((join: string) => {
-            queryBuilder.innerJoinAndSelect(`entity.${join}`, join);
-          });
-        }
-
         const elements = await queryBuilder.getMany();
         const total = await queryBuilder.getCount();
 
@@ -302,7 +286,7 @@ export function BaseService<T>(
       }
     }
 
-    public async findById(id: number): Promise<T> {
+    public async findById(id: string): Promise<T> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -392,7 +376,7 @@ export function BaseService<T>(
     }
 
     public async update(
-      id: number,
+      id: string,
       updateDto: Params,
       opt: CustomUpdateOptions,
       activeUser?: ActiveUserData,
@@ -420,7 +404,7 @@ export function BaseService<T>(
     }
 
     public async updateMany(
-      ids: number[],
+      ids: string[],
       conditions: Params,
       opt: CustomUpdateOptions,
       activeUser?: ActiveUserData,
@@ -447,7 +431,7 @@ export function BaseService<T>(
       }
     }
 
-    public async remove(id: number): Promise<any> {
+    public async remove(id: string): Promise<any> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -462,7 +446,7 @@ export function BaseService<T>(
       }
     }
 
-    public async removeMany(ids: number[]): Promise<any> {
+    public async removeMany(ids: string[]): Promise<any> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -478,7 +462,7 @@ export function BaseService<T>(
     }
 
     public async softRemove(
-      id: number,
+      id: string,
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
@@ -503,7 +487,7 @@ export function BaseService<T>(
       }
     }
     public async softRemoveMany(
-      ids: number[],
+      ids: string[],
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
@@ -530,7 +514,7 @@ export function BaseService<T>(
     }
 
     public async restore(
-      id: number,
+      id: string,
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
@@ -557,7 +541,7 @@ export function BaseService<T>(
     }
 
     public async restoreMany(
-      ids: number[],
+      ids: string[],
       activeUser?: ActiveUserData,
     ): Promise<any> {
       try {
