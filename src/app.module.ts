@@ -32,8 +32,8 @@ import redisConfig from './redis/config/redis.config';
     EventEmitterModule.forRoot(),
     DatabaseModule,
     AuthModule,
-    EMailerModule,
     TypedEventEmitterModule,
+    ...(process.env.EMAIL_USER ? [EMailerModule] : []),
     ...(process.env.GOOGLE_CLIENT_ID ? [GoogleAuthModule] : []),
   ],
 })
