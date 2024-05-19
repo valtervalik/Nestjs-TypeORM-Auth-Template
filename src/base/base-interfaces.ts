@@ -34,26 +34,26 @@ export interface IBaseService<M> {
     updateDto: Params,
     opt: CustomUpdateOptions,
     activeUser?: ActiveUserData,
-  ): Promise<M>;
+  ): Promise<void | M>;
 
   updateMany(
     ids: string[],
     conditions: Params,
     opt: CustomUpdateOptions,
     activeUser?: ActiveUserData,
-  ): Promise<any>;
+  ): Promise<void | M[]>;
 
-  remove(id: string): Promise<any>;
+  remove(id: string): Promise<void>;
 
-  removeMany(ids: string[]): Promise<any>;
+  removeMany(ids: string[]): Promise<void>;
 
-  softRemove(id: string, activeUser?: ActiveUserData): Promise<any>;
+  softRemove(id: string, activeUser?: ActiveUserData): Promise<void>;
 
-  softRemoveMany(ids: string[], activeUser?: ActiveUserData): Promise<any>;
+  softRemoveMany(ids: string[], activeUser?: ActiveUserData): Promise<void>;
 
-  restore(id: string, activeUser?: ActiveUserData): Promise<any>;
+  restore(id: string, activeUser?: ActiveUserData): Promise<void>;
 
-  restoreMany(ids: string[], activeUser?: ActiveUserData): Promise<any>;
+  restoreMany(ids: string[], activeUser?: ActiveUserData): Promise<void>;
 
   count(conditions?: Params): Promise<number>;
 }

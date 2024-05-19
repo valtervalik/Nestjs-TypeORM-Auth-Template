@@ -380,7 +380,7 @@ export function BaseService<T>(
       updateDto: Params,
       opt: CustomUpdateOptions,
       activeUser?: ActiveUserData,
-    ): Promise<T | any> {
+    ): Promise<void | T> {
       try {
         const updateData = activeUser
           ? { ...updateDto, updated_by: activeUser.sub }
@@ -408,7 +408,7 @@ export function BaseService<T>(
       conditions: Params,
       opt: CustomUpdateOptions,
       activeUser?: ActiveUserData,
-    ): Promise<T[] | any> {
+    ): Promise<void | T[]> {
       try {
         const updateData = activeUser
           ? { ...conditions, updated_by: activeUser.sub }
@@ -431,7 +431,7 @@ export function BaseService<T>(
       }
     }
 
-    public async remove(id: string): Promise<any> {
+    public async remove(id: string): Promise<void> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -446,7 +446,7 @@ export function BaseService<T>(
       }
     }
 
-    public async removeMany(ids: string[]): Promise<any> {
+    public async removeMany(ids: string[]): Promise<void> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -464,7 +464,7 @@ export function BaseService<T>(
     public async softRemove(
       id: string,
       activeUser?: ActiveUserData,
-    ): Promise<any> {
+    ): Promise<void> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
         await queryBuilder.softDelete().where('id = :id', { id }).execute();
@@ -489,7 +489,7 @@ export function BaseService<T>(
     public async softRemoveMany(
       ids: string[],
       activeUser?: ActiveUserData,
-    ): Promise<any> {
+    ): Promise<void> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -516,7 +516,7 @@ export function BaseService<T>(
     public async restore(
       id: string,
       activeUser?: ActiveUserData,
-    ): Promise<any> {
+    ): Promise<void> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
@@ -543,7 +543,7 @@ export function BaseService<T>(
     public async restoreMany(
       ids: string[],
       activeUser?: ActiveUserData,
-    ): Promise<any> {
+    ): Promise<void> {
       try {
         const queryBuilder = this.genericRepository.createQueryBuilder();
 
