@@ -1,9 +1,12 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
+  Patch,
   Post,
   Req,
   Res,
@@ -12,7 +15,9 @@ import {
 import { Request, Response } from 'express';
 import { toFileStream } from 'qrcode';
 import { TypedEventEmitter } from 'src/common/types/typed-event-emitter/typed-event-emitter.class';
+import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { apiResponseHandler } from 'src/utils/apiResponseHandler';
 import { REFRESH_TOKEN_KEY } from '../auth.constants';
 import { ActiveUser } from '../decorators/active-user.decorator';
@@ -24,15 +29,18 @@ import { AuthType } from './enums/auth-type.enum';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { TwoFactorAuthService } from './two-factor-auth/two-factor-auth.service';
 
-@Auth(AuthType.None)
 @Controller('auth')
 export class AuthenticationController {
+  private readonly logger = new Logger(AuthenticationController.name);
+
   constructor(
     private readonly authenticationService: AuthenticationService,
     private readonly twoFactorAuthService: TwoFactorAuthService,
     private readonly eventEmitter: TypedEventEmitter,
+    private readonly usersService: UsersService,
   ) {}
 
+  @Auth(AuthType.None)
   @Post('sign-up')
   async signUp(@Body() signUpDto: SignUpDto) {
     const user = await this.authenticationService.create(signUpDto);
@@ -48,6 +56,7 @@ export class AuthenticationController {
     );
   }
 
+  @Auth(AuthType.None)
   @UseGuards(LocalAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Post('sign-in')
@@ -63,6 +72,7 @@ export class AuthenticationController {
     return apiResponseHandler('Login successful', HttpStatus.OK, accessToken);
   }
 
+  @Auth(AuthType.None)
   @HttpCode(HttpStatus.OK)
   @Post('refresh')
   refreshToken(
@@ -73,7 +83,6 @@ export class AuthenticationController {
     return this.authenticationService.refreshToken(refreshToken, response);
   }
 
-  @Auth(AuthType.Bearer)
   @HttpCode(HttpStatus.OK)
   @Post('2fa/generate')
   async generateQrCode(
@@ -89,7 +98,6 @@ export class AuthenticationController {
     return toFileStream(response, uri);
   }
 
-  @Auth(AuthType.Bearer)
   @HttpCode(HttpStatus.OK)
   @Post('2fa/disable')
   async disableTFA(@ActiveUser() activeUser: ActiveUserData) {
@@ -97,6 +105,42 @@ export class AuthenticationController {
 
     return apiResponseHandler(
       'Two-factor authentication disabled successfully',
+      HttpStatus.OK,
+    );
+  }
+
+  @Patch('change-password')
+  async changePassword(
+    @Body() changePasswordDto: ChangePasswordDto,
+    @ActiveUser() activeUser: ActiveUserData,
+  ) {
+    this.logger.log(`Changing password for user with id ${activeUser.sub}`);
+
+    const { email, oldPassword, password, confirmPassword } = changePasswordDto;
+
+    const user = await this.authenticationService.validateUser(
+      email,
+      oldPassword,
+    );
+
+    if (user.id !== activeUser.sub) {
+      throw new BadRequestException(
+        'No es posible cambiar la contraseña de otro usuario',
+      );
+    }
+
+    if (password !== confirmPassword) {
+      throw new BadRequestException('Credenciales incorrectas');
+    }
+
+    await this.usersService.update(user.id, { password }, { new: false });
+
+    this.logger.log(
+      `Password changed successfully for user with id ${activeUser.sub}`,
+    );
+
+    return apiResponseHandler(
+      `Contraseña actualizada exitosamente`,
       HttpStatus.OK,
     );
   }
