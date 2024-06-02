@@ -5,6 +5,7 @@ import {
   EntitySubscriberInterface,
   EventSubscriber,
   InsertEvent,
+  UpdateEvent,
 } from 'typeorm';
 
 @EventSubscriber()
@@ -24,9 +25,15 @@ export class UserSubscriber implements EntitySubscriberInterface<User> {
     const { password } = event.entity;
 
     password
-      ? (event.entity.password = await this.hashingService.hash(
-          event.entity.password,
-        ))
+      ? (event.entity.password = await this.hashingService.hash(password))
+      : null;
+  }
+
+  async beforeUpdate(event: UpdateEvent<User>) {
+    const { password } = event.entity;
+
+    password
+      ? (event.entity.password = await this.hashingService.hash(password))
       : null;
   }
 }
