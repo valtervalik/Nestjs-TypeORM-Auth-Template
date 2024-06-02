@@ -1,3 +1,4 @@
+import { UUID } from 'crypto';
 import {
   Column,
   CreateDateColumn,
@@ -8,7 +9,7 @@ import {
 
 export abstract class Base {
   @PrimaryGeneratedColumn('uuid')
-  id: string;
+  id: UUID;
 
   @CreateDateColumn()
   created_at: Date;
