@@ -17,7 +17,6 @@ import { toFileStream } from 'qrcode';
 import { TypedEventEmitter } from 'src/common/types/typed-event-emitter/typed-event-emitter.class';
 import { ChangePasswordDto } from 'src/users/dto/change-password.dto';
 import { User } from 'src/users/entities/user.entity';
-import { UsersService } from 'src/users/users.service';
 import { apiResponseHandler } from 'src/utils/apiResponseHandler';
 import { REFRESH_TOKEN_KEY } from '../auth.constants';
 import { ActiveUser } from '../decorators/active-user.decorator';
@@ -37,7 +36,6 @@ export class AuthenticationController {
     private readonly authenticationService: AuthenticationService,
     private readonly twoFactorAuthService: TwoFactorAuthService,
     private readonly eventEmitter: TypedEventEmitter,
-    private readonly usersService: UsersService,
   ) {}
 
   @Auth(AuthType.None)
@@ -109,6 +107,21 @@ export class AuthenticationController {
     );
   }
 
+  @Get('current-user')
+  getCurrentUser(@ActiveUser() activeUser: ActiveUserData) {
+    return this.authenticationService.findOne({
+      id: activeUser.sub,
+      relations: ['role', 'permission'],
+    });
+  }
+
+  @Auth(AuthType.None)
+  @Get('logout')
+  logout(@Res({ passthrough: true }) response: Response) {
+    response.clearCookie(REFRESH_TOKEN_KEY);
+    return apiResponseHandler('Logout successful', HttpStatus.OK);
+  }
+
   @Patch('change-password')
   async changePassword(
     @Body() changePasswordDto: ChangePasswordDto,
@@ -133,7 +146,11 @@ export class AuthenticationController {
       throw new BadRequestException('Credenciales incorrectas');
     }
 
-    await this.usersService.update(user.id, { password }, { new: false });
+    await this.authenticationService.update(
+      user.id,
+      { password },
+      { new: false },
+    );
 
     this.logger.log(
       `Password changed successfully for user with id ${activeUser.sub}`,
@@ -143,11 +160,5 @@ export class AuthenticationController {
       `Contraseña actualizada exitosamente`,
       HttpStatus.OK,
     );
-  }
-
-  @Get('logout')
-  logout(@Res({ passthrough: true }) response: Response) {
-    response.clearCookie(REFRESH_TOKEN_KEY);
-    return apiResponseHandler('Logout successful', HttpStatus.OK);
   }
 }
