@@ -153,13 +153,6 @@ export function BaseService<T>(
           });
         }
 
-        queryBuilder
-          .select(select.length > 0 ? select : null)
-          .andWhere(where)
-          .skip(skipCount)
-          .take(limit)
-          .orderBy(`entity.${order}`, orderDirection);
-
         if (relations.length > 0) {
           relations.forEach((relation: string) => {
             const nestedRelations = relation.split('.');
@@ -177,6 +170,22 @@ export function BaseService<T>(
             }
           });
         }
+
+        queryBuilder
+          .select(
+            select.length > 0
+              ? select.map((s: string) => {
+                  const parts = s.split('.');
+                  return parts.length > 1
+                    ? `${parts[0]}.${parts.slice(1).join('.')}`
+                    : `entity.${s}`;
+                })
+              : null,
+          )
+          .andWhere(where)
+          .skip(skipCount)
+          .take(limit)
+          .orderBy(`entity.${order}`, orderDirection);
 
         const [elements, totalElements] = await queryBuilder.getManyAndCount();
 
@@ -253,11 +262,6 @@ export function BaseService<T>(
           });
         }
 
-        queryBuilder
-          .select(select.length > 0 ? select : null)
-          .andWhere(where)
-          .orderBy(`entity.${order}`, orderDirection);
-
         if (relations.length > 0) {
           relations.forEach((relation: string) => {
             const nestedRelations = relation.split('.');
@@ -275,6 +279,20 @@ export function BaseService<T>(
             }
           });
         }
+
+        queryBuilder
+          .select(
+            select.length > 0
+              ? select.map((s: string) => {
+                  const parts = s.split('.');
+                  return parts.length > 1
+                    ? `${parts[0]}.${parts.slice(1).join('.')}`
+                    : `entity.${s}`;
+                })
+              : null,
+          )
+          .andWhere(where)
+          .orderBy(`entity.${order}`, orderDirection);
 
         const elements = await queryBuilder.getMany();
         const total = await queryBuilder.getCount();
@@ -319,12 +337,6 @@ export function BaseService<T>(
           delete where.deleted;
         }
 
-        queryBuilder
-          .select(
-            select.length > 0 ? select.map((s: string) => `entity.${s}`) : null,
-          )
-          .where(where);
-
         if (relations.length > 0) {
           relations.forEach((relation: string) => {
             const nestedRelations = relation.split('.');
@@ -342,6 +354,19 @@ export function BaseService<T>(
             }
           });
         }
+
+        queryBuilder
+          .select(
+            select.length > 0
+              ? select.map((s: string) => {
+                  const parts = s.split('.');
+                  return parts.length > 1
+                    ? `${parts[0]}.${parts.slice(1).join('.')}`
+                    : `entity.${s}`;
+                })
+              : null,
+          )
+          .where(where);
 
         const response = await queryBuilder.getOne();
 
